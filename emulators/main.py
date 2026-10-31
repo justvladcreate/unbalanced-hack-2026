@@ -31,7 +31,6 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--serial", default="", help="серийник на платформе")
     p.add_argument("--ext", default="", help="device_ext_guid (wire sn)")
     p.add_argument("--sn", default="", help="serialnumber для поллинга")
-    p.add_argument("--sensors", type=int, default=3, help="хаб: сколько датчиков")
     p.add_argument("--ust", default="", help="ust резидента: поллинг команд")
     p.add_argument("--base-url", "--base", dest="base_url",
                    default=os.environ.get("UJIN_BASE",
@@ -97,8 +96,6 @@ def main() -> None:
         kwargs["floors"] = args.floors
     if family == "counter":
         kwargs["resource"] = args.resource
-    if family in ("hub", "air"):
-        kwargs["sensors"] = args.sensors
     device = REGISTRY[family](serial=args.serial or args.ext or "0",
                               client=client, **kwargs)
     if args.model:

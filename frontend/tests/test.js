@@ -11,6 +11,10 @@ function getRoleBlock(isAdmin) {
     return isAdmin ? 'admin-block' : 'user-block';
 }
 
+function hasActiveSession(token) {
+    return token !== null && token !== undefined && token !== '';
+}
+
 describe("Валидация формы входа", function() {
     it("должен возвращать true, если логин и пароль введены", function() {
         assert.isTrue(isValidLogin("admin", "123"));
@@ -43,5 +47,15 @@ describe("Определение роли интерфейса", function() {
 
     it("должен возвращать user-block для жильца", function() {
         assert.equal(getRoleBlock(false), 'user-block');
+    });
+});
+
+describe("Проверка сессии", function() {
+    it("должен возвращать true, если токен есть", function() {
+        assert.isTrue(hasActiveSession("test-token"));
+    });
+
+    it("должен возвращать false, если токена нет", function() {
+        assert.isFalse(hasActiveSession(null));
     });
 });

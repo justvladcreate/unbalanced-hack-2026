@@ -28,16 +28,40 @@ async function loadDevices() {
     }
 }
 
+function showDashboard(isAdmin) {
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    
+    const roleLabel = document.getElementById('role-label');
+    const adminBlock = document.getElementById('admin-block');
+    const userBlock = document.getElementById('user-block');
+
+    if (isAdmin) {
+        roleLabel.textContent = '(Админ)';
+        adminBlock.style.display = 'block';
+        userBlock.style.display = 'none';
+    } else {
+        roleLabel.textContent = '(Жилец)';
+        adminBlock.style.display = 'none';
+        userBlock.style.display = 'block';
+    }
+
+    loadDevices();
+    setInterval(loadDevices, 2000);
+}
+
 window.onload = async () => {
     await fetchData();
     
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
-    const loginForm = document.getElementById('login-form');
-    const dashboard = document.getElementById('dashboard');
-    const adminBlock = document.getElementById('admin-block');
-    const userBlock = document.getElementById('user-block');
-    const roleLabel = document.getElementById('role-label');
+
+    const savedToken = localStorage.getItem('token');
+    const savedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+
+    if (savedToken) {
+        showDashboard(savedIsAdmin);
+    }
 
     if (loginBtn) {
         loginBtn.addEventListener('click', async () => {
@@ -54,20 +78,9 @@ window.onload = async () => {
                 const data = await response.json();
                 
                 if (data.success) {
-                    loginForm.style.display = 'none';
-                    dashboard.style.display = 'block';
-                    
-                    if (data.isAdmin) {
-                        roleLabel.textContent = '(Админ)';
-                        adminBlock.style.display = 'block';
-                        userBlock.style.display = 'none';
-                    } else {
-                        roleLabel.textContent = '(Жилец)';
-                        adminBlock.style.display = 'none';
-                        userBlock.style.display = 'block';
-                    }
-                    
-                    loadDevices();
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('isAdmin', data.isAdmin);
+                    showDashboard(data.isAdmin);
                 } else {
                     alert("Ошибка: " + data.error);
                 }
@@ -79,10 +92,8 @@ window.onload = async () => {
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            loginForm.style.display = 'block';
-            dashboard.style.display = 'none';
-            document.getElementById('login').value = '';
-            document.getElementById('password').value = '';
+            localStorage.clear();
+            location.reload();
         });
     }
 

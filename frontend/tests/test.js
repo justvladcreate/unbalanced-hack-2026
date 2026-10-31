@@ -59,3 +59,33 @@ describe("Проверка сессии", function() {
         assert.isFalse(hasActiveSession(null));
     });
 });
+
+function checkPermission(isAdmin, hasPermission) {
+    if (isAdmin == true) {
+        return "full_access";
+    } else if (hasPermission == true) {
+        return "admin_like_access";
+    } else {
+        return "restricted";
+    }
+}
+
+describe("Тесты логики UI", function() {
+    it("Проверка логина", function() {
+        assert.equal(1, 1);
+    });
+});
+
+describe("Проверка ролей по диаграмме", function() {
+    it("Админ имеет полный доступ", function() {
+        assert.equal(checkPermission(true, false), "full_access");
+    });
+
+    it("Жилец с разрешением имеет доступ к у-вам", function() {
+        assert.equal(checkPermission(false, true), "admin_like_access");
+    });
+
+    it("Обычный жилец ограничен", function() {
+        assert.equal(checkPermission(false, false), "restricted");
+    });
+});

@@ -1,149 +1,182 @@
-const API_URL = 'http://localhost:3000';
+var API = 'http://localhost:3000/api';
+var myToken = '';
+var amIAdmin = false;
+var myPermission = false;
 
-async function fetchData() {
-    try {
-        const response = await fetch(`${API_URL}/tests`);
-        const text = await response.text();
-        console.log("Данные с сервера получены:", text.substring(0, 50) + "...");
-    } catch (error) {
-        console.error('Error fetching data:', error);
+window.onload = function() {
+    var saved = localStorage.getItem('myUser');
+    if (saved) {
+        var obj = JSON.parse(saved);
+        myToken = obj.token;
+        amIAdmin = obj.isAdmin;
+        myPermission = obj.hasPermission;
+        openMain();
     }
 }
 
-async function loadDevices() {
-    try {
-        const response = await fetch(`${API_URL}/api/devices`);
-        const devices = await response.json();
-        
-        const list = document.getElementById('devices-list');
-        list.innerHTML = '';
-        
-        devices.forEach(device => {
-            const li = document.createElement('li');
-            li.textContent = `${device.name} (${device.type}) - ${device.status}`;
-            list.appendChild(li);
-        });
-    } catch (error) {
-        console.error('Error loading devices:', error);
-    }
+function showReg() {
+    document.getElementById('auth-block').style.display = 'none';
+    document.getElementById('reg-block').style.display = 'block';
 }
 
-function showDashboard(isAdmin) {
-    document.getElementById('login-form').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
+function hideReg() {
+    document.getElementById('auth-block').style.display = 'block';
+    document.getElementById('reg-block').style.display = 'none';
+}
+
+function doRegister() {
+    var l = document.getElementById('reg-login').value;
+    var p = document.getElementById('reg-pass').value;
     
-    const roleLabel = document.getElementById('role-label');
-    const adminBlock = document.getElementById('admin-block');
-    const userBlock = document.getElementById('user-block');
+    fetch(API + '/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login: l, password: p })
+    }).then(function(r) { return r.json(); }).then(function(d) {
+        alert("Успешно зарегистрировались!");
+        hideReg();
+    });
+}
 
-    if (isAdmin) {
-        roleLabel.textContent = '(Админ)';
-        adminBlock.style.display = 'block';
-        userBlock.style.display = 'none';
+function doLogin() {
+    var l = document.getElementById('login').value;
+    var p = document.getElementById('password').value;
+
+    fetch(API + '/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login: l, password: p })
+    }).then(function(res) {
+        if (res.status == 400) {
+            alert("Ошибка логина!");
+            return;
+        }
+        return res.json();
+    }).then(function(data) {
+        if (data) {
+            myToken = data.token;
+            amIAdmin = data.isAdmin;
+            myPermission = data.hasPermission;
+            
+            localStorage.setItem('myUser', JSON.stringify(data));
+            console.log("Вошли! Админ? " + amIAdmin);
+            openMain();
+        }
+    });
+}
+
+function openMain() {
+    document.getElementById('auth-block').style.display = 'none';
+    document.getElementById('main-screen').style.display = 'block';
+    
+    if (amIAdmin == true) {
+        document.getElementById('role-text').innerText = '(Админ)';
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('user-panel').style.display = 'none';
     } else {
-        roleLabel.textContent = '(Жилец)';
-        adminBlock.style.display = 'none';
-        userBlock.style.display = 'block';
+        document.getElementById('role-text').innerText = '(Жилец)';
+        document.getElementById('admin-panel').style.display = 'none';
+        
+        if (myPermission == true) {
+            document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('user-panel').style.display = 'none';
+        } else {
+            document.getElementById('user-panel').style.display = 'block';
+        }
     }
-
+    
     loadDevices();
-    setInterval(loadDevices, 2000);
+    loadScenarios();
+    loadNotifs();
+    
+    // Опрос раз в 2 секунды, как на диаграмме
+    setInterval(function() {
+        console.log("Проверяем активность...");
+        loadDevices();
+    }, 2000);
 }
 
-window.onload = async () => {
-    await fetchData();
+function logout() {
+    localStorage.removeItem('myUser');
+    location.reload();
+}
+
+function loadDevices() {
+    fetch(API + '/devices').then(function(r) { return r.json(); }).then(function(devs) {
+        var ul = document.getElementById('device-list');
+        ul.innerHTML = '';
+        for (var i = 0; i < devs.length; i++) {
+            // Плохая практика: += в цикле и document.createElement
+            var li = document.createElement('li');
+            li.innerText = devs[i].name + ' - ' + devs[i].status;
+            ul.appendChild(li);
+        }
+    });
+}
+
+function addDevice() {
+    var n = document.getElementById('dev-name').value;
+    var t = document.getElementById('dev-type').value;
     
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
+    fetch(API + '/devices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: n, type: t })
+    }).then(function() {
+        alert("Устройство добавлено!");
+        loadDevices();
+    });
+}
 
-    const savedToken = localStorage.getItem('token');
-    const savedIsAdmin = localStorage.getItem('isAdmin') === 'true';
+function loadScenarios() {
+    fetch(API + '/scenarios').then(function(r) { return r.json(); }).then(function(data) {
+        var ul = document.getElementById('scenario-list');
+        ul.innerHTML = '';
+        for (var i = 0; i < data.length; i++) {
+            var li = document.createElement('li');
+            li.innerText = data[i].name;
+            ul.appendChild(li);
+        }
+    });
+}
 
-    if (savedToken) {
-        showDashboard(savedIsAdmin);
-    }
+function addScenario() {
+    var name = document.getElementById('scen-name').value;
+    fetch(API + '/scenarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name })
+    }).then(function() {
+        alert("Сценарий создан!");
+        loadScenarios();
+    });
+}
 
-    if (loginBtn) {
-        loginBtn.addEventListener('click', async () => {
-            const loginVal = document.getElementById('login').value;
-            const passVal = document.getElementById('password').value;
+function loadNotifs() {
+    fetch(API + '/notifications').then(function(r) { return r.json(); }).then(function(data) {
+        var ul = document.getElementById('notif-list');
+        ul.innerHTML = '';
+        for (var i = 0; i < data.length; i++) {
+            var li = document.createElement('li');
+            li.innerText = data[i].text;
+            ul.appendChild(li);
+        }
+    });
+}
 
-            try {
-                const response = await fetch(`${API_URL}/api/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ login: loginVal, password: passVal })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('isAdmin', data.isAdmin);
-                    showDashboard(data.isAdmin);
-                } else {
-                    alert("Ошибка: " + data.error);
-                }
-            } catch (err) {
-                console.error("Ошибка при отправке:", err);
-            }
-        });
-    }
+function sendRequest() {
+    var txt = document.getElementById('req-text').value;
+    fetch(API + '/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: txt })
+    }).then(function() {
+        alert("Запрос в УК отправлен!");
+    });
+}
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            localStorage.clear();
-            location.reload();
-        });
-    }
-
-    const addDeviceBtn = document.getElementById('add-device-btn');
-    if (addDeviceBtn) {
-        addDeviceBtn.addEventListener('click', async () => {
-            const name = document.getElementById('new-dev-name').value;
-            const type = document.getElementById('new-dev-type').value;
-
-            if (!name || !type) {
-                return alert('Заполните все поля');
-            }
-
-            try {
-                await fetch(`${API_URL}/api/devices`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, type })
-                });
-                
-                document.getElementById('new-dev-name').value = '';
-                document.getElementById('new-dev-type').value = '';
-                loadDevices();
-            } catch (err) {
-                console.error(err);
-            }
-        });
-    }
-
-    const sendRequestBtn = document.getElementById('send-request-btn');
-    if (sendRequestBtn) {
-        sendRequestBtn.addEventListener('click', async () => {
-            const text = document.getElementById('request-text').value;
-
-            if (!text) {
-                return alert('Введите текст запроса');
-            }
-
-            try {
-                await fetch(`${API_URL}/api/requests`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text })
-                });
-                
-                document.getElementById('request-text').value = '';
-                alert('Запрос отправлен в УК');
-            } catch (err) {
-                console.error(err);
-            }
-        });
-    }
+function givePermission() {
+    fetch(API + '/give-permission', { method: 'POST' }).then(function() {
+        alert("Права жильцу выданы!");
+    });
 }

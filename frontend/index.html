@@ -2,42 +2,58 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Ujin - Вход</title>
+    <title>Ujin Мокап</title>
 </head>
 <body>
-    <h1>Добро пожаловать</h1>
+    <h1>Система Умный Дом</h1>
     
-    <div id="login-form">
-        <h2>Вход в систему</h2>
+    <div id="auth-block">
+        <h2>Вход</h2>
         <input type="text" id="login" placeholder="Логин"><br><br>
         <input type="password" id="password" placeholder="Пароль"><br><br>
-        <button id="login-btn">Войти</button>
+        <button onclick="doLogin()">Войти</button>
+        <button onclick="showReg()">Регистрация</button>
     </div>
 
-    <div id="dashboard" style="display: none;">
-        <h2>Ваши устройства <span id="role-label"></span></h2>
+    <div id="reg-block" style="display: none;">
+        <h2>Регистрация</h2>
+        <input type="text" id="reg-login" placeholder="Новый логин"><br><br>
+        <input type="password" id="reg-pass" placeholder="Новый пароль"><br><br>
+        <button onclick="doRegister()">Зарегистрироваться</button>
+        <button onclick="hideReg()">Назад</button>
+    </div>
+
+    <div id="main-screen" style="display: none;">
+        <h2>Главная <span id="role-text"></span></h2>
+        <button onclick="logout()">Выйти</button>
         
-        <ul id="devices-list"></ul>
-        
-        <div id="admin-block" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 20px;">
-            <h3>Добавить устройство</h3>
-            <input type="text" id="new-dev-name" placeholder="Название"><br><br>
-            <input type="text" id="new-dev-type" placeholder="Тип (например, leak)"><br><br>
-            <button id="add-device-btn">Добавить</button>
+        <div id="admin-panel" style="display: none;">
+            <h3>Управление устройствами</h3>
+            <input type="text" id="dev-name" placeholder="Имя устройства">
+            <input type="text" id="dev-type" placeholder="Тип">
+            <button onclick="addDevice()">Добавить устройство</button>
+            
+            <h3>Редактор сценариев</h3>
+            <input type="text" id="scen-name" placeholder="Название сценария">
+            <button onclick="addScenario()">Добавить сценарий</button>
+            <button onclick="givePermission()">Дать разрешение жильцу</button>
         </div>
 
-        <div id="user-block" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 20px;">
+        <div id="user-panel" style="display: none;">
             <h3>Связь с УК</h3>
-            <input type="text" id="request-text" placeholder="Текст запроса"><br><br>
-            <button id="send-request-btn">Отправить</button>
+            <input type="text" id="req-text" placeholder="Что случилось?">
+            <button onclick="sendRequest()">Отправить запрос</button>
         </div>
 
-        <br>
-        <button id="logout-btn">Выйти</button>
-    </div>
+        <h3>Мои устройства</h3>
+        <ul id="device-list"></ul>
 
-    <br>
-    <a href="/tests" class="btn">Перейти к запуску тестов</a>
+        <h3>Мои сценарии</h3>
+        <ul id="scenario-list"></ul>
+
+        <h3>Уведомления</h3>
+        <ul id="notif-list"></ul>
+    </div>
 
     <script src="script.js"></script>
 </body>

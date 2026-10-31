@@ -28,6 +28,30 @@ app.get('/api/devices', (req, res) => {
     res.json(devices);
 });
 
+app.post('/api/devices', (req, res) => {
+    const { name, type } = req.body;
+    if (!name || !type) {
+        return res.status(400).json({ error: 'Заполните все поля' });
+    }
+    const newDevice = {
+        id: Date.now(),
+        name: name,
+        type: type,
+        status: 'NEW'
+    };
+    devices.push(newDevice);
+    res.json(newDevice);
+});
+
+app.post('/api/requests', (req, res) => {
+    const { text } = req.body;
+    if (!text) {
+        return res.status(400).json({ error: 'Введите текст запроса' });
+    }
+    console.log(`Запрос в УК: ${text}`);
+    res.json({ success: true });
+});
+
 app.get('/tests', (req, res) => {
   res.sendFile(path.join(frontend, 'tests.html'));
 });

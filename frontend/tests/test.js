@@ -7,6 +7,10 @@ function getDeviceStatusText(device) {
     return `${device.name} (${device.type}) - ${device.status}`;
 }
 
+function getRoleBlock(isAdmin) {
+    return isAdmin ? 'admin-block' : 'user-block';
+}
+
 describe("Валидация формы входа", function() {
     it("должен возвращать true, если логин и пароль введены", function() {
         assert.isTrue(isValidLogin("admin", "123"));
@@ -29,5 +33,15 @@ describe("Форматирование устройств", function() {
 
     it("должен возвращать заглушку, если устройство не передано", function() {
         assert.equal(getDeviceStatusText(null), 'Неизвестно');
+    });
+});
+
+describe("Определение роли интерфейса", function() {
+    it("должен возвращать admin-block для админа", function() {
+        assert.equal(getRoleBlock(true), 'admin-block');
+    });
+
+    it("должен возвращать user-block для жильца", function() {
+        assert.equal(getRoleBlock(false), 'user-block');
     });
 });

@@ -35,6 +35,9 @@ window.onload = async () => {
     const logoutBtn = document.getElementById('logout-btn');
     const loginForm = document.getElementById('login-form');
     const dashboard = document.getElementById('dashboard');
+    const adminBlock = document.getElementById('admin-block');
+    const userBlock = document.getElementById('user-block');
+    const roleLabel = document.getElementById('role-label');
 
     if (loginBtn) {
         loginBtn.addEventListener('click', async () => {
@@ -53,6 +56,17 @@ window.onload = async () => {
                 if (data.success) {
                     loginForm.style.display = 'none';
                     dashboard.style.display = 'block';
+                    
+                    if (data.isAdmin) {
+                        roleLabel.textContent = '(Админ)';
+                        adminBlock.style.display = 'block';
+                        userBlock.style.display = 'none';
+                    } else {
+                        roleLabel.textContent = '(Жилец)';
+                        adminBlock.style.display = 'none';
+                        userBlock.style.display = 'block';
+                    }
+                    
                     loadDevices();
                 } else {
                     alert("Ошибка: " + data.error);
@@ -69,6 +83,56 @@ window.onload = async () => {
             dashboard.style.display = 'none';
             document.getElementById('login').value = '';
             document.getElementById('password').value = '';
+        });
+    }
+
+    const addDeviceBtn = document.getElementById('add-device-btn');
+    if (addDeviceBtn) {
+        addDeviceBtn.addEventListener('click', async () => {
+            const name = document.getElementById('new-dev-name').value;
+            const type = document.getElementById('new-dev-type').value;
+
+            if (!name || !type) {
+                return alert('Заполните все поля');
+            }
+
+            try {
+                await fetch(`${API_URL}/api/devices`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, type })
+                });
+                
+                document.getElementById('new-dev-name').value = '';
+                document.getElementById('new-dev-type').value = '';
+                loadDevices();
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    }
+
+    const sendRequestBtn = document.getElementById('send-request-btn');
+    if (sendRequestBtn) {
+        sendRequestBtn.addEventListener('click', async () => {
+            const text = document.getElementById('request-text').value;
+
+            if (!text) {
+                return alert('Введите текст запроса');
+            }
+
+            try {
+                await fetch(`${API_URL}/api/requests`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                document.getElementById('request-text').value = '';
+                alert('Запрос отправлен в УК');
+            } catch (err) {
+                console.error(err);
+            }
         });
     }
 }

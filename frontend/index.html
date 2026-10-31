@@ -15,8 +15,24 @@
     </div>
 
     <div id="dashboard" style="display: none;">
-        <h2>Ваши устройства</h2>
+        <h2>Ваши устройства <span id="role-label"></span></h2>
+        
         <ul id="devices-list"></ul>
+        
+        <div id="admin-block" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 20px;">
+            <h3>Добавить устройство</h3>
+            <input type="text" id="new-dev-name" placeholder="Название"><br><br>
+            <input type="text" id="new-dev-type" placeholder="Тип (например, leak)"><br><br>
+            <button id="add-device-btn">Добавить</button>
+        </div>
+
+        <div id="user-block" style="display: none; border: 1px solid #ccc; padding: 10px; margin-top: 20px;">
+            <h3>Связь с УК</h3>
+            <input type="text" id="request-text" placeholder="Текст запроса"><br><br>
+            <button id="send-request-btn">Отправить</button>
+        </div>
+
+        <br>
         <button id="logout-btn">Выйти</button>
     </div>
 

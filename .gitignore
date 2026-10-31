@@ -277,3 +277,4 @@ src/testTestingRootWkspc/coverageWorkspace/.coverage
 *.code-workspace
 
 *.zip
+.vscode/

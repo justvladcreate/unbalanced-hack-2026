@@ -8,9 +8,7 @@
       "building_id": null,
       "location": "кв. 2989",
       "note": "unbalanced_leak_01, parkcloud_device",
-      "enabled": true,
-      "created_at": "2026-10-31T15:29:38.491213+00:00",
-      "updated_at": "2026-10-31T15:29:38.491213+00:00"
+      "enabled": true
     },
     {
       "serial": "17025585610005712",
@@ -20,9 +18,7 @@
       "building_id": null,
       "location": "кв. 2989",
       "note": "unbalanced_barrier_01, parkcloud_device",
-      "enabled": true,
-      "created_at": "2026-10-31T15:29:38.491213+00:00",
-      "updated_at": "2026-10-31T15:29:38.491213+00:00"
+      "enabled": true
     },
     {
       "serial": "17048697650003684",
@@ -32,9 +28,7 @@
       "building_id": null,
       "location": "кв. 2989",
       "note": "unbalanced_thermostat_01, parkcloud_device",
-      "enabled": true,
-      "created_at": "2026-10-31T15:29:38.491213+00:00",
-      "updated_at": "2026-10-31T15:29:38.491213+00:00"
+      "enabled": true
     },
     {
       "serial": "17036925610005923",
@@ -44,9 +38,7 @@
       "building_id": null,
       "location": "кв. 2989",
       "note": "unbalanced_counter_01, parkcloud_device",
-      "enabled": true,
-      "created_at": "2026-10-31T15:29:38.491213+00:00",
-      "updated_at": "2026-10-31T15:29:38.491213+00:00"
+      "enabled": true
     },
     {
       "serial": "17036961610008345",
@@ -56,9 +48,7 @@
       "building_id": null,
       "location": "кв. 2989",
       "note": "unbalanced_light_01, parkcloud_device",
-      "enabled": true,
-      "created_at": "2026-10-31T15:29:38.491213+00:00",
-      "updated_at": "2026-10-31T15:29:38.491213+00:00"
+      "enabled": true
     },
     {
       "serial": "string",
@@ -68,9 +58,7 @@
       "building_id": 0,
       "location": "",
       "note": "",
-      "enabled": true,
-      "created_at": "2026-10-31T15:37:43.102367+00:00",
-      "updated_at": "2026-10-31T15:37:43.102367+00:00"
+      "enabled": true
     }
   ]
 }

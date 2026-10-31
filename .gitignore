@@ -278,3 +278,8 @@ src/testTestingRootWkspc/coverageWorkspace/.coverage
 
 *.zip
 .vscode/
+
+*.md
+STAMP.txt
+доступы.json
+unbalanced.pdf

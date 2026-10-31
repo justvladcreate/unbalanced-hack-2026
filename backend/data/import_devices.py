@@ -29,8 +29,6 @@ for d in creds["devices"]:
         "location": f"кв. {d.get('apartment_id') or apartment}",
         "note": f"{d.get('ext')}, {d.get('model')}",
         "enabled": True,
-        "created_at": now,
-        "updated_at": now,
     })
 
 (HERE / "devices.json").write_text(

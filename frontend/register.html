@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=, initial-scale=1.0">
+    <title>Регистрация</title>
+    
+    <style>
+        body {
+            background-color: rgb(106, 106, 106);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .v1 {
+            width: 600px;
+            height: 500px;
+            background-color: gray;
+            border-radius: 30px;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .v11, .v22 {
+            width: 100px;
+            height: 35px;
+            border-radius: 999px;
+            flex: 1;
+            font-size: 15px;
+            cursor: pointer;
+
+        }
+        .login, .password {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px;
+            border-radius: 999px;
+            padding: 4px 4px 4px 20px;
+            transition: border-color 0.2s;
+        }
+        .login:focus-within, .password:focus-within {
+            border-color: cornsilk;
+        }
+        
+        .login input, .password input {
+            flex: 1;
+
+            outline: none;
+            background: transparent;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 999px;
+            margin: 50px;
+        }
+
+    </style>
+
+</head>
+<body>
+    <div class="v1">
+        <div class="login">
+            <label for="login"></label>
+            <input type="text" id="login" name="login" placeholder="Логин">
+        </div>
+
+        <div class="password">
+            <label for="password"></label>
+            <input type="password" id="password" name="password" placeholder="Пароль">
+        </div>
+        <div class="tab">
+            <button class="v11">Регистрация</button>
+            <button class="v22">Вход</button>
+        </div>
+    </div>
+</body>
+</html>

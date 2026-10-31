@@ -16,7 +16,7 @@
             max-width: 75px;
             max-height: 630px;
             overflow-x: auto;
-            background-color: white;
+            background-color: gray;
             border-radius: 50px;
             margin: 0px;
             margin-top: 30px;
@@ -30,7 +30,7 @@
             height: 65px;
             width: 65px;
             border-radius: 50px;
-            background-color: blue;
+            background-color: white;
             margin: 5px;
             flex-shrink: 0;
         }
@@ -113,7 +113,7 @@
         }
         .cont3 {
             background-color: white;
-            width: 300px;
+            width: 315px;
             height: 75px; 
             border-radius: 50px;
             flex-shrink: 0;
@@ -121,14 +121,158 @@
         }
         .cont4 {
             background-color: white;
-            width: 300px;
+            width: 315px;
             height: 420px; 
-            border-radius: 50px;
+            border-radius: 20px;
             margin-left: 25px;
             flex-shrink: 0;
             margin-top: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
         .cont34 {
+        }
+        .barrier {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .counter {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .elevator {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .fire {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .leak_hub {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .leak_sensor {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .light {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .thermostat {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .ventilation {
+            height: 50px;
+            width: 280px;
+            background-color: gray;
+            border-radius: 50px;
+            margin: 5px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: white;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+        .cont4helper {
+            max-height: 420px;
         }
 
     </style>
@@ -152,7 +296,7 @@
                 <div class="plus_datchik">+</div>
             </div>
         </button>
-        <button class="knopka4" onclick="location.href='tri_poloski.html'">
+        <button class="knopka4" onclick="location.href='register.html'">
             <div class="concont4">
                 <div class="tri_poloski">☰</div>
             </div>
@@ -161,10 +305,30 @@
     <div class="cont2">
     </div>
     <div class="cont34">
-    <div class="cont3">
-    </div>
-    <div class="cont4">
-    </div>
+        <div class="cont3">
+        </div>
+        <div class="cont4">
+            <div class="cont4helper">
+               <div class="barrier">barrier
+                </div>
+                <div class="counter">counter
+                </div> 
+                <div class="elevator">elevator
+                </div> 
+                <div class="fire">fire
+                </div>
+                <div class="leak_hub">leak_hub
+                </div>
+                <div class="leak_sensor">leak_sensor
+                </div>
+                <div class="light">light
+                </div>
+                <div class="thermostat">thermostat
+                </div>
+                <div class="ventilation">ventilation
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

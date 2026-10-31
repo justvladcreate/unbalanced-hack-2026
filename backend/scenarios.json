@@ -1,0 +1,22 @@
+{
+  "next_id": 2,
+  "items": [
+    {
+      "title": "leak: leak=1 → barrier: open_cmd=1",
+      "scenario_type": "trigger",
+      "condition": "when:device-leak:integrations_devices_leak=1",
+      "set_signal": "device-barrier:open_cmd:1:60",
+      "rule": "если leak:leak=1 то barrier:open_cmd=1:60",
+      "enabled": true,
+      "platform_id": 0,
+      "mode": "dry-run",
+      "warnings": [],
+      "last_response": {
+        "error": 0,
+        "dry_run": true
+      },
+      "created_at": "2026-10-31T18:23:50",
+      "id": 1
+    }
+  ]
+}

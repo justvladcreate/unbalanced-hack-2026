@@ -23,6 +23,11 @@ class Device(BaseModel):
 app = FastAPI()
 
 
+@app.get("/")
+def root():
+    return {"devices": len(db), "list": "/api/devices", "docs": "/docs"}
+
+
 def save():
     FILE.write_text(json.dumps({"devices": list(db.values())}, ensure_ascii=False, indent=2), "utf-8")
 

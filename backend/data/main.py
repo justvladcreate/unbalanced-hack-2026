@@ -54,7 +54,7 @@ def get_device(serial: str):
     return db[serial]
 
 
-@app.post("/api/devices", status_code=201)
+@app.post("/api/Device", status_code=201)
 def create_device(device: Device):
     device.serial = device.serial.strip()
     device.model = device.model.strip()
@@ -63,6 +63,5 @@ def create_device(device: Device):
     if device.serial in db:
         raise HTTPException(409, "устройство уже есть")
     now = datetime.now(timezone.utc).isoformat()
-    db[device.serial] = {**device.model_dump(), "created_at": now, "updated_at": now}
     save()
     return db[device.serial]

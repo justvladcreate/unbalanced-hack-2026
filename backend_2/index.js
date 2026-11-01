@@ -8,6 +8,11 @@ var frontend = path.join(__dirname, '../frontend');
 
 app.use(cors());
 app.use(express.json());
+
+app.get('/', function(req, res) {
+    res.sendFile(path.join(frontend, 'register.html'));
+});
+
 app.use(express.static(frontend));
 
 var devices = [

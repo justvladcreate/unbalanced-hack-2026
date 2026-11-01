@@ -191,6 +191,19 @@ async def add_device_to_project(
     
     emulator_instance = REGISTRY[data.family](serial=dev_id, client=ujin_client)
 
+    try:
+        ujin_client.create_update_device(
+            model=emulator_instance.model,
+            title=data.title,
+            apartment_id=2989,
+            device_ext_id=dev_id,
+            path="2989",
+            mask="building_title",
+        )
+        emulator_instance.announce()
+    except Exception:
+        pass
+
     device_data = {
         "id": dev_id,
         "title": data.title,
@@ -346,6 +359,11 @@ async def update_device_signal(
     emulator.step(1)  
 
     target_dev["state"] = {s.name: s.value for s in emulator.signals.values()}
+
+    try:
+        ujin_client.update_signals(device_id, emulator.model, [{"signal": cmd.signal, "value": cmd.value}])
+    except Exception:
+        pass
 
     evaluate_scenarios(project)
 

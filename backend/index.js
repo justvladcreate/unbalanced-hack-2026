@@ -29,6 +29,7 @@ var notifications = [
 ];
 
 var requests = [];
+var fastHistory = {};
 
 var users = [
     { login: 'admin', pass: 'admin', isAdmin: true, hasPermission: false },
@@ -75,7 +76,93 @@ app.get('/api/users', function(req, res) {
 });
 
 app.get('/api/devices', function(req, res) {
-    res.json(devices);
+    var token = req.query.token;
+
+    if (!token) {
+        return res.json(devices);
+    }
+
+    var headers = { 'Authorization': 'Bearer ' + token };
+
+    fetch('http://localhost:8000/api/v1/users/me', { headers: headers }).then(function(response) {
+        return response.json();
+    }).then(function(user) {
+        var url = 'http://localhost:8000/api/v1/smart_house';
+
+        if (user.is_superuser == true) {
+            url = url + '/admin/all';
+        }
+
+        return fetch(url, { headers: headers }).then(function(response) {
+            return response.json();
+        });
+    }).then(function(projects) {
+        var result = [];
+
+        for (var i = 0; i < devices.length; i++) {
+            if (!devices[i].ext_id) {
+                result.push(devices[i]);
+            }
+        }
+
+        for (var p = 0; p < projects.length; p++) {
+            if (!projects[p].devices) {
+                continue;
+            }
+
+            for (var d = 0; d < projects[p].devices.length; d++) {
+                var fastDevice = projects[p].devices[d];
+
+                if (!fastDevice.declaration || !fastDevice.state) {
+                    continue;
+                }
+
+                var key = 'p' + projects[p].id + '_' + fastDevice.id;
+                var history = {};
+
+                if (fastHistory[key]) {
+                    history = fastHistory[key];
+                }
+
+                for (var s = 0; s < fastDevice.declaration.length; s++) {
+                    var signal = fastDevice.declaration[s];
+                    var value = fastDevice.state[signal.name];
+
+                    if (signal.control != 'graph' || typeof value != 'number') {
+                        continue;
+                    }
+
+                    if (!history[signal.name]) {
+                        history[signal.name] = [];
+                    }
+
+                    history[signal.name].push({ t: Date.now(), v: value });
+
+                    if (history[signal.name].length > 30) {
+                        history[signal.name].shift();
+                    }
+                }
+
+                fastHistory[key] = history;
+
+                result.push({
+                    id: key,
+                    name: fastDevice.title,
+                    type: fastDevice.family,
+                    ext_id: fastDevice.id,
+                    family: fastDevice.family,
+                    state: fastDevice.state,
+                    declaration: fastDevice.declaration,
+                    history: history,
+                    status: 'OK'
+                });
+            }
+        }
+
+        res.json(result);
+    }).catch(function() {
+        res.json(devices);
+    });
 });
 
 app.post('/api/devices', function(req, res) {

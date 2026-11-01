@@ -150,20 +150,33 @@ function openFilters() {
     };
 }
 
-fetch('/api/devices').then(function(response) {
-    return response.json();
-}).then(function(list) {
-    devices = list;
+var firstLoad = true;
 
-    for (var i = 0; i < devices.length; i++) {
-        selectedTypes[devices[i].type] = true;
-    }
+function loadDevices() {
+    fetch('/api/devices?token=' + encodeURIComponent(user.token)).then(function(response) {
+        return response.json();
+    }).then(function(list) {
+        devices = list;
 
-    var filterBox = document.querySelector('.cont3');
-    filterBox.innerHTML = '<button id="open-filters" style="width: 100%; height: 100%; border: none; border-radius: 50px; background: gray; color: white; font-size: 20px; cursor: pointer;">Фильтры</button>';
+        for (var i = 0; i < devices.length; i++) {
+            if (selectedTypes[devices[i].type] == undefined) {
+                selectedTypes[devices[i].type] = true;
+            }
+        }
 
-    document.getElementById('open-filters').onclick = openFilters;
+        if (firstLoad == true) {
+            var filterBox = document.querySelector('.cont3');
+            filterBox.innerHTML = '<button id="open-filters" style="width: 100%; height: 100%; border: none; border-radius: 50px; background: gray; color: white; font-size: 20px; cursor: pointer;">Фильтры</button>';
 
-    drawDevices();
-    openFilters();
-});
+            document.getElementById('open-filters').onclick = openFilters;
+            firstLoad = false;
+            drawDevices();
+            openFilters();
+        } else {
+            drawDevices();
+        }
+    });
+}
+
+loadDevices();
+setInterval(loadDevices, 2000);

@@ -46,7 +46,7 @@ function getDeviceClass(type) {
 }
 
 function loadDevices() {
-    fetch('/api/devices').then(function(response) {
+    fetch('/api/devices?token=' + encodeURIComponent(user.token)).then(function(response) {
         return response.json();
     }).then(function(devices) {
         var box = document.querySelector('.cont4helper');

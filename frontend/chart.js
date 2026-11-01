@@ -1,5 +1,6 @@
 var chartDevice = null;
 var chartCanvas = null;
+var chartUser = JSON.parse(localStorage.getItem('myUser') || '{}');
 
 function setupChart() {
     var box = document.querySelector('.cont2');
@@ -133,7 +134,7 @@ function showChart(device) {
 }
 
 function refreshChart() {
-    fetch('/api/devices').then(function(response) {
+    fetch('/api/devices?token=' + encodeURIComponent(chartUser.token || '')).then(function(response) {
         return response.json();
     }).then(function(list) {
         if (!chartDevice) {

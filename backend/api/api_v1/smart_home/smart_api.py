@@ -58,6 +58,19 @@ async def get_user_project(
     return project
 
 
+def build_emulator(device: dict):
+    emulator = REGISTRY[device["family"]](serial=device["id"], client=ujin_client)
+
+    for name, value in device.get("state", {}).items():
+        if name in emulator.signals:
+            emulator.signals[name].value = value
+
+    if hasattr(emulator, "set_wet") and device.get("state", {}).get("leak") == 1:
+        emulator.set_wet(True)
+
+    return emulator
+
+
 def evaluate_scenarios(project: SmartHouse):
     """Проверяет сценарии умного дома и формирует алерты на телефон."""
     devices_map = {d["id"]: d for d in project.devices}
@@ -214,6 +227,64 @@ async def delete_device(
 
     project.devices = [d for d in project.devices if d["id"] != device_id]
     flag_modified(project, "devices")
+    await session.commit()
+    await session.refresh(project)
+    return project
+
+
+@router.post("/{project_id}/devices/{device_id}/tick", response_model=SmartHouseRead)
+async def tick_device(
+    project_id: int,
+    device_id: str,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    steps: int = 1,
+):
+    project = await get_user_project(project_id, user, session)
+    target_dev = next((d for d in project.devices if d["id"] == device_id), None)
+
+    if not target_dev:
+        raise HTTPException(status_code=404, detail="Устройство не найдено")
+
+    emulator = build_emulator(target_dev)
+
+    for i in range(steps):
+        emulator.step(1)
+
+    target_dev["state"] = {s.name: s.value for s in emulator.signals.values()}
+    evaluate_scenarios(project)
+
+    flag_modified(project, "devices")
+    flag_modified(project, "notifications")
+    await session.commit()
+    await session.refresh(project)
+    return project
+
+
+@router.post("/{project_id}/tick", response_model=SmartHouseRead)
+async def tick_project(
+    project_id: int,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    steps: int = 1,
+):
+    project = await get_user_project(project_id, user, session)
+
+    for device in project.devices:
+        if device.get("family") not in REGISTRY:
+            continue
+
+        emulator = build_emulator(device)
+
+        for i in range(steps):
+            emulator.step(1)
+
+        device["state"] = {s.name: s.value for s in emulator.signals.values()}
+
+    evaluate_scenarios(project)
+
+    flag_modified(project, "devices")
+    flag_modified(project, "notifications")
     await session.commit()
     await session.refresh(project)
     return project

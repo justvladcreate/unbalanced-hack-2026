@@ -85,6 +85,20 @@ function addControl(panel, device, signal) {
     panel.appendChild(wrapper);
 }
 
+function tickDevice(device) {
+    fetch('http://localhost:8000/api/v1/smart_house/' + device.project_id + '/devices/' + device.ext_id + '/tick?steps=1', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + controlsUser.token
+        }
+    }).then(function(response) {
+        return response.json();
+    }).then(function() {
+        alert('Эмулятор обновился');
+        refreshChart();
+    });
+}
+
 function showControls(device) {
     var panel = document.getElementById('device-controls');
 
@@ -99,6 +113,14 @@ function showControls(device) {
         return;
     }
 
+    var tickButton = document.createElement('button');
+    tickButton.innerText = 'Шаг эмулятора';
+    tickButton.style.cssText = 'border: none; border-radius: 50px; padding: 6px 12px; background: gray; color: white; cursor: pointer;';
+    tickButton.onclick = function() {
+        tickDevice(device);
+    };
+    panel.appendChild(tickButton);
+
     var count = 0;
 
     for (var i = 0; i < device.declaration.length; i++) {
@@ -111,7 +133,9 @@ function showControls(device) {
     }
 
     if (count == 0) {
-        panel.innerText = 'Нет управляемых сигналов';
+        var text = document.createElement('span');
+        text.innerText = 'Нет управляемых сигналов';
+        panel.appendChild(text);
     }
 }
 

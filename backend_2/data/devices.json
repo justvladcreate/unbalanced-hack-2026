@@ -1,0 +1,64 @@
+{
+  "devices": [
+    {
+      "serial": "17048769610011623",
+      "model": "leak",
+      "title": "Датчик протечки",
+      "apartment_id": 2989,
+      "building_id": null,
+      "location": "кв. 2989",
+      "note": "unbalanced_leak_01, parkcloud_device",
+      "enabled": true
+    },
+    {
+      "serial": "17025585610005712",
+      "model": "barrier",
+      "title": "Шлагбаум",
+      "apartment_id": 2989,
+      "building_id": null,
+      "location": "кв. 2989",
+      "note": "unbalanced_barrier_01, parkcloud_device",
+      "enabled": true
+    },
+    {
+      "serial": "17048697650003684",
+      "model": "thermostat",
+      "title": "Термостат",
+      "apartment_id": 2989,
+      "building_id": null,
+      "location": "кв. 2989",
+      "note": "unbalanced_thermostat_01, parkcloud_device",
+      "enabled": true
+    },
+    {
+      "serial": "17036925610005923",
+      "model": "counter",
+      "title": "Счётчик",
+      "apartment_id": 2989,
+      "building_id": null,
+      "location": "кв. 2989",
+      "note": "unbalanced_counter_01, parkcloud_device",
+      "enabled": true
+    },
+    {
+      "serial": "17036961610008345",
+      "model": "light",
+      "title": "Освещение",
+      "apartment_id": 2989,
+      "building_id": null,
+      "location": "кв. 2989",
+      "note": "unbalanced_light_01, parkcloud_device",
+      "enabled": true
+    },
+    {
+      "serial": "string",
+      "model": "string",
+      "title": "",
+      "apartment_id": 0,
+      "building_id": 0,
+      "location": "",
+      "note": "",
+      "enabled": true
+    }
+  ]
+}

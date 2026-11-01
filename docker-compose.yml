@@ -1,0 +1,11 @@
+services:
+
+  pg:
+    image: postgres:15.3-alpine
+    container_name: hakaton_postgres
+    environment:
+      POSTGRES_DB: hakaton
+      POSTGRES_USER: stasoa
+      POSTGRES_PASSWORD: lkhujolasnmhjzxmn
+    ports:
+      - "5432:5432"

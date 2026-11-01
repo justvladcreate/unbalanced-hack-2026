@@ -7,100 +7,49 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from core.config import settings
 from core.models import db_helper, User, SmartHouse
-from core.schemas.smart_house import (
-    SmartCreate,
-    SmartHouseRead,
-    DeviceAdd,
-    DeviceCommand,
-    ScenarioAdd,
-)
-from api.api_v1.fastapi_users_router import (
-    current_active_user,
-    current_active_superuser,
-)
-
+from core.schemas.smart_house import SmartCreate, SmartHouseRead, DeviceAdd, DeviceCommand, ScenarioAdd
+from api.api_v1.fastapi_users_router import current_active_user, current_active_superuser
 from emulators.devices import REGISTRY
-from emulators.emulator_core import Device, Signal
 from emulators.ujin_client import UjinClient
 
-router = APIRouter(
-    prefix=settings.api.v1.smart,
-    tags=["SmartProjects"],
-)
+router = APIRouter(prefix=settings.api.v1.smart, tags=["SmartProjects"])
 
 ujin_client = UjinClient(
-    base_url="https://api-uae-test.ujin.tech",
-    dry_run=True,
-    cls="integrations_devices",
-    signal_prefix="integrations_devices_",
-    ust="ust-2815121-6f30cdab01d04065cabc0229c67985ae",
-    apartment_id="2989",
+    base_url="https://api-uae-test.ujin.tech", dry_run=True,
+    cls="integrations_devices", signal_prefix="integrations_devices_",
+    ust="ust-2815121-6f30cdab01d04065cabc0229c67985ae", apartment_id="2989",
 )
 
-
-async def get_user_project(
-    project_id: int,
-    user: User,
-    session: AsyncSession,
-) -> SmartHouse:
+async def get_project(project_id: int, user: User, session: AsyncSession) -> SmartHouse:
     project = await session.get(SmartHouse, project_id)
-    if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Проект не найден",
-        )
-    if project.owner_id != user.id and not user.is_superuser:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к чужому проекту",
-        )
+    if not project or (project.owner_id != user.id and not user.is_superuser):
+        raise HTTPException(status_code=404, detail="Проект не найден или нет доступа")
     return project
 
+def evaluate_and_save(proj: SmartHouse, flag_field: str):
+    flag_modified(proj, flag_field)
 
-def evaluate_scenarios(project: SmartHouse):
-    """Проверяет сценарии умного дома и формирует алерты на телефон."""
-    devices_map = {d["id"]: d for d in project.devices}
-
-    for sc in project.scenarios:
-        trig_dev = devices_map.get(sc["trigger_device_id"])
-        if not trig_dev:
-            continue
-
-        current_val = trig_dev["state"].get(sc["trigger_signal"])
-        if str(current_val) == str(sc["trigger_value"]):
-            act_dev = devices_map.get(sc.get("action_device_id"))
-            if act_dev and sc.get("action_signal"):
-                act_dev["state"][sc["action_signal"]] = sc["action_value"]
-
-            project.notifications.insert(0, {
-                "name_project": project.name_project,
-                "phone": project.owner_phone,
-                "scenario": sc["title"],
-                "message": f"SMS на тел. {project.owner_phone}: {sc['notifications_text']}",
-            })
-
-
+@router.get("/families")
+async def families():
+    return {"families": list(REGISTRY.keys())}
 
 @router.get("", response_model=list[SmartHouseRead])
-async def get_my_projects(
+async def list_projects(
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
-    stmt = select(SmartHouse).where(SmartHouse.owner_id == user.id)
-    result = await session.execute(stmt)
-    return result.scalars().all()
-
+    ):
+    projects = await session.execute(select(SmartHouse).where(SmartHouse.owner_id == user.id))
+    return projects.scalars().all()
 
 @router.post("", response_model=SmartHouseRead)
-async def create_project(
+async def create_proj(
     data: SmartCreate,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
+    ):
     project = SmartHouse(
-        name_project=data.name,
-        owner_id=user.id,
-        owner_phone=getattr(user, "phone", None) or "",
+        name_project=data.name, owner_id=user.id, apartment=getattr(data, "apartment", "2989"),
+        owner_phone=getattr(user, "phone", None) or "+79903855761",
         devices=[],
         scenarios=[],
         notifications=[],
@@ -110,140 +59,130 @@ async def create_project(
     await session.refresh(project)
     return project
 
-
 @router.get("/{project_id}", response_model=SmartHouseRead)
-async def get_project_by_id(
-    project_id: int,
-    user: Annotated[User, Depends(current_active_user)],
-    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
-    return await get_user_project(project_id, user, session)
-
+async def get_proj_by_id(project_id: int, user: Annotated[User, Depends(current_active_user)], session: Annotated[AsyncSession, Depends(db_helper.session_getter)]):
+    return await get_project(project_id, user, session)
 
 @router.delete("/{project_id}")
-async def delete_project(
+async def delete_proj(
     project_id: int,
     user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
-    project = await get_user_project(project_id, user, session)
+    ):
+    project = await get_project(project_id, user, session)
     await session.delete(project)
     await session.commit()
     return {"ok": True}
 
-
-
 @router.post("/{project_id}/devices", response_model=SmartHouseRead)
-async def add_device_to_project(
+async def add_device(
     project_id: int,
     data: DeviceAdd,
     user: Annotated[User, Depends(current_active_user)],
-    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
-    project = await get_user_project(project_id, user, session)
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
+    ):
+    project = await get_project(project_id, user, session)
     if data.family not in REGISTRY:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Неизвестное семейство. Доступны: {list(REGISTRY.keys())}",
-        )
-
-    dev_id = f"{data.family}_{len(project.devices) + 1}"
+        raise HTTPException(status_code=400, detail="Неизвестное семейство устройств")
     
-    emulator_instance = REGISTRY[data.family](serial=dev_id, client=ujin_client)
-
-    device_data = {
+    dev_id = f"{data.family}_{len(project.devices) + 1}"
+    emul = REGISTRY[data.family](serial=dev_id, client=ujin_client)
+    project.devices.append({
         "id": dev_id,
         "title": data.title,
         "family": data.family,
-        "state": {s.name: s.value for s in emulator_instance.signals.values()},
-        "declaration": emulator_instance.declaration(),
-    }
-
-    project.devices.append(device_data)
-    flag_modified(project, "devices")
+        "online": True,
+        "state": {s.name: s.value for s in emul.signals.values()},
+        "declaration": emul.declaration()
+        })
+    
+    evaluate_and_save(project, "devices")
     await session.commit()
     await session.refresh(project)
     return project
 
+@router.delete("/{project_id}/devices/{device_id}", response_model=SmartHouseRead)
+async def delete_device(
+    project_id: int,
+    device_id: str,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
+    ):
+    project = await get_project(project_id, user, session)
+    project.devices = [d for d in project.devices if d["id"] != device_id]
+    evaluate_and_save(project, "devices")
+    await session.commit()
+    await session.refresh(project)
+    return project
 
 @router.post("/{project_id}/devices/{device_id}/command", response_model=SmartHouseRead)
-async def update_device_signal(
+async def device_cmd(
     project_id: int,
     device_id: str,
     cmd: DeviceCommand,
     user: Annotated[User, Depends(current_active_user)],
-    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
-    project = await get_user_project(project_id, user, session)
-    target_dev = next((d for d in project.devices if d["id"] == device_id), None)
-    if not target_dev:
-        raise HTTPException(status_code=404, detail="Устройство не найдено")
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
+    ):
+    project = await get_project(project_id, user, session)
+    dev = next((d for d in project.devices if d["id"] == device_id), None)
+    if not dev: raise HTTPException(status_code=404, detail="Устройство не найдено")
 
-    emulator = REGISTRY[target_dev["family"]](serial=device_id, client=ujin_client)
-    for k, v in target_dev["state"].items():
-        if k in emulator.signals:
-            emulator.signals[k].value = v
+    emul = REGISTRY[dev["family"]](serial=device_id, client=ujin_client)
+    for k, v in dev["state"].items():
+        if k in emul.signals: emul.signals[k].value = v
 
-    if cmd.signal not in emulator.signals:
-        raise HTTPException(status_code=400, detail="Сигнал не найден у устройства")
-
-    sig_obj = emulator.signals[cmd.signal]
-    if sig_obj.writable:
-        emulator.handle_recv({"recv": [{"command": "management", "id": device_id, cmd.signal: cmd.value}]
-      })
-        emulator.step(1)
+    if cmd.signal in emul.signals and emul.signals[cmd.signal].writable:
+        emul.handle_recv({"recv": [{"command": "management", "id": device_id, cmd.signal: cmd.value}]})
+        emul.step(1)
     else:
-    
-        if hasattr(emulator, "set_wet") and cmd.signal == "leak":
-            emulator.set_wet(bool(int(cmd.value)))
-            emulator.step(1)
-        elif hasattr(emulator, "set_smoke") and cmd.signal == "smoke":
-            emulator.set_smoke(int(cmd.value))
-            emulator.step(1)
-        else:
-            emulator.set_value(cmd.signal, cmd.value)
-            emulator.flush()
+        emul.set_value(cmd.signal, cmd.value)
+        emul.flush()
 
-    target_dev["state"] = {s.name: s.value for s in emulator.signals.values()}
+    dev["state"] = {s.name: s.value for s in emul.signals.values()}
 
-    evaluate_scenarios(project)
+    for sc in project.scenarios:
+        trig = project.devices.count
+        if sc["trigger_device_id"] == device_id and str(dev["state"].get(sc["trigger_signal"])) == str(sc["trigger_value"]):
+            project.notifications.insert(0, {"scenario": sc["title"], "message": sc.get("notification_text", "Сработало!")})
 
-    flag_modified(project, "devices")
-    flag_modified(project, "notifications")
+    evaluate_and_save(project, "devices")
+    evaluate_and_save(project, "notifications")
     await session.commit()
     await session.refresh(project)
     return project
 
-
-
 @router.post("/{project_id}/scenarios", response_model=SmartHouseRead)
-async def create_scenario(
+async def add_scenario(
     project_id: int,
     data: ScenarioAdd,
     user: Annotated[User, Depends(current_active_user)],
-    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
-    project = await get_user_project(project_id, user, session)
-    scenario_dict = {
-        "id": len(project.scenarios) + 1,
-        **data.model_dump(),
-    }
-    project.scenarios.append(scenario_dict)
-    evaluate_scenarios(project)
-
-    flag_modified(project, "scenarios")
-    flag_modified(project, "devices")
-    flag_modified(project, "notifications")
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
+    ):
+    project = await get_project(project_id, user, session)
+    project.scenarios.append({"id": len(project.scenarios) + 1, **data.model_dump()})
+    evaluate_and_save(project, "scenarios")
     await session.commit()
     await session.refresh(project)
     return project
 
-
+@router.delete("/{project_id}/scenarios/{scenario_id}", response_model=SmartHouseRead)
+async def delete_scenario(
+    project_id: int,
+    scenario_id: int,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
+    ):
+    project = await get_project(project_id, user, session)
+    project.scenarios = [s for s in project.scenarios if s.get("id") != scenario_id]
+    evaluate_and_save(project, "scenarios")
+    await session.commit()
+    await session.refresh(project)
+    return project
 
 @router.get("/admin/all", response_model=list[SmartHouseRead])
-async def get_all_projects_for_admin(
+async def admin_all(
     admin: Annotated[User, Depends(current_active_superuser)],
-    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-):
-    result = await session.execute(select(SmartHouse))
-    return result.scalars().all()
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
+    ):
+    res = await session.execute(select(SmartHouse))
+    return res.scalars().all()

@@ -89,3 +89,50 @@ describe("Проверка ролей по диаграмме", function() {
         assert.equal(checkPermission(false, false), "restricted");
     });
 });
+
+function checkPermission(isAdmin, hasPermission) {
+    if (isAdmin == true) {
+        return "full_access";
+    } else if (hasPermission == true) {
+        return "admin_like_access";
+    } else {
+        return "restricted";
+    }
+}
+
+function canSeeScenario(scenario, myLogin) {
+    if (scenario.isShared == true) {
+        return true;
+    }
+    if (scenario.owner == myLogin) {
+        return true;
+    }
+    return false;
+}
+
+describe("Проверка ролей по диаграмме", function() {
+    it("Админ имеет полный доступ", function() {
+        assert.equal(checkPermission(true, false), "full_access");
+    });
+
+    it("Жилец с разрешением имеет доступ к у-вам", function() {
+        assert.equal(checkPermission(false, true), "admin_like_access");
+    });
+
+    it("Обычный жилец ограничен", function() {
+        assert.equal(checkPermission(false, false), "restricted");
+    });
+});
+
+describe("Видимость сценариев", function() {
+    it("Общий сценарий виден всем", function() {
+        var s = { name: 'Протечка', owner: 'admin', isShared: true };
+        assert.isTrue(canSeeScenario(s, 'user'));
+    });
+
+    it("Личный сценарий виден только владельцу", function() {
+        var s = { name: 'Мой', owner: 'admin', isShared: false };
+        assert.isTrue(canSeeScenario(s, 'admin'));
+        assert.isFalse(canSeeScenario(s, 'user'));
+    });
+});

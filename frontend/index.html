@@ -33,22 +33,25 @@
             <input type="text" id="dev-type" placeholder="Тип">
             <button onclick="addDevice()">Добавить устройство</button>
             
+            <h3>Заявки от жильцов</h3>
+            <ul id="requests-list"></ul>
+
             <h3>Редактор сценариев</h3>
             <input type="text" id="scen-name" placeholder="Название сценария">
+            <label><input type="checkbox" id="scen-shared"> Общий (видят все)</label>
             <button onclick="addScenario()">Добавить сценарий</button>
-            <button onclick="givePermission()">Дать разрешение жильцу</button>
         </div>
 
         <div id="user-panel" style="display: none;">
-            <h3>Связь с УК</h3>
-            <input type="text" id="req-text" placeholder="Что случилось?">
-            <button onclick="sendRequest()">Отправить запрос</button>
+            <h3>Запрос прав</h3>
+            <p>Хотите сами управлять устройствами?</p>
+            <button onclick="requestPermission()">Запросить разрешение на создание и настройку у-в</button>
         </div>
 
         <h3>Мои устройства</h3>
         <ul id="device-list"></ul>
 
-        <h3>Мои сценарии</h3>
+        <h3>Сценарии</h3>
         <ul id="scenario-list"></ul>
 
         <h3>Уведомления</h3>

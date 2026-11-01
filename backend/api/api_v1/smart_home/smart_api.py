@@ -73,7 +73,7 @@ def evaluate_scenarios(project: SmartHouse):
                 act_dev["state"][sc["action_signal"]] = sc["action_value"]
 
             project.notifications.insert(0, {
-                "name_project": project.name,
+                "name_project": project.name_project,
                 "phone": project.owner_phone,
                 "scenario": sc["title"],
                 "message": f"SMS на тел. {project.owner_phone}: {sc['notifications_text']}",

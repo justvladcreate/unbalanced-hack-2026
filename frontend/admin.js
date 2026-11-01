@@ -100,6 +100,24 @@ function loadNotifications() {
                     box.innerHTML += '<div class="barrier1">' + requests[j].login + ' — ' + requests[j].status + '</div>';
                 }
             }
+
+            if (user.token) {
+                fetch('http://localhost:8000/api/v1/smart_house/admin/all', {
+                    headers: { 'Authorization': 'Bearer ' + user.token }
+                }).then(function(response) {
+                    return response.json();
+                }).then(function(projects) {
+                    for (var p = 0; p < projects.length; p++) {
+                        if (!projects[p].notifications) {
+                            continue;
+                        }
+
+                        for (var n = 0; n < projects[p].notifications.length; n++) {
+                            box.innerHTML += '<div class="barrier1">' + projects[p].notifications[n].message + '</div>';
+                        }
+                    }
+                });
+            }
         });
     });
 }

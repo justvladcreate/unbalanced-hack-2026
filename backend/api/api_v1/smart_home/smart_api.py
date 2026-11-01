@@ -11,6 +11,7 @@ from core.schemas.smart_house import (
     SmartCreate,
     SmartHouseRead,
     DeviceAdd,
+    DeviceUpdate,
     DeviceCommand,
     ScenarioAdd,
 )
@@ -160,6 +161,58 @@ async def add_device_to_project(
     }
 
     project.devices.append(device_data)
+    flag_modified(project, "devices")
+    await session.commit()
+    await session.refresh(project)
+    return project
+
+
+@router.put("/{project_id}/devices/{device_id}", response_model=SmartHouseRead)
+async def update_device(
+    project_id: int,
+    device_id: str,
+    data: DeviceUpdate,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+):
+    project = await get_user_project(project_id, user, session)
+    target_dev = next((d for d in project.devices if d["id"] == device_id), None)
+
+    if not target_dev:
+        raise HTTPException(status_code=404, detail="Устройство не найдено")
+
+    if data.family and data.family != target_dev["family"]:
+        if data.family not in REGISTRY:
+            raise HTTPException(status_code=400, detail="Неизвестное семейство")
+
+        emulator = REGISTRY[data.family](serial=device_id, client=ujin_client)
+        target_dev["family"] = data.family
+        target_dev["state"] = {s.name: s.value for s in emulator.signals.values()}
+        target_dev["declaration"] = emulator.declaration()
+
+    if data.title is not None:
+        target_dev["title"] = data.title
+
+    flag_modified(project, "devices")
+    await session.commit()
+    await session.refresh(project)
+    return project
+
+
+@router.delete("/{project_id}/devices/{device_id}", response_model=SmartHouseRead)
+async def delete_device(
+    project_id: int,
+    device_id: str,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+):
+    project = await get_user_project(project_id, user, session)
+    target_dev = next((d for d in project.devices if d["id"] == device_id), None)
+
+    if not target_dev:
+        raise HTTPException(status_code=404, detail="Устройство не найдено")
+
+    project.devices = [d for d in project.devices if d["id"] != device_id]
     flag_modified(project, "devices")
     await session.commit()
     await session.refresh(project)

@@ -5,6 +5,7 @@ if (!saved) {
 }
 
 var user = JSON.parse(saved);
+var adminDevices = [];
 
 if (user.isAdmin != true) {
     location.href = 'domik.html';
@@ -49,13 +50,87 @@ function loadDevices() {
     fetch('/api/devices?token=' + encodeURIComponent(user.token)).then(function(response) {
         return response.json();
     }).then(function(devices) {
+        adminDevices = devices;
         var box = document.querySelector('.cont4helper');
         box.innerHTML = '';
 
         for (var i = 0; i < devices.length; i++) {
             var cssClass = getDeviceClass(devices[i].type);
-            box.innerHTML += '<div class="' + cssClass + '">' + devices[i].name + ' — ' + devices[i].status + '</div>';
+            var buttons = '';
+
+            if (devices[i].project_id && devices[i].ext_id) {
+                buttons = ' <button onclick="showDeviceInfo(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Возможности</button>';
+                buttons += ' <button onclick="editFastDevice(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Изменить</button>';
+                buttons += ' <button onclick="deleteFastDevice(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Удалить</button>';
+            }
+
+            box.innerHTML += '<div class="' + cssClass + '">' + devices[i].name + ' — ' + devices[i].status + buttons + '</div>';
         }
+    });
+}
+
+function findAdminDevice(projectId, deviceId) {
+    for (var i = 0; i < adminDevices.length; i++) {
+        if (adminDevices[i].project_id == projectId && adminDevices[i].ext_id == deviceId) {
+            return adminDevices[i];
+        }
+    }
+    return null;
+}
+
+function showDeviceInfo(projectId, deviceId) {
+    var device = findAdminDevice(projectId, deviceId);
+
+    if (!device || !device.declaration) {
+        return;
+    }
+
+    var text = device.name + '\n';
+
+    for (var i = 0; i < device.declaration.length; i++) {
+        text = text + device.declaration[i].title + ' (' + device.declaration[i].name + ')\n';
+    }
+
+    alert(text);
+}
+
+function editFastDevice(projectId, deviceId) {
+    var device = findAdminDevice(projectId, deviceId);
+
+    if (!device) {
+        return;
+    }
+
+    var title = prompt('Новое имя устройства', device.name);
+
+    if (title == null || title == '') {
+        return;
+    }
+
+    fetch('http://localhost:8000/api/v1/smart_house/' + projectId + '/devices/' + deviceId, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + user.token
+        },
+        body: JSON.stringify({ title: title })
+    }).then(function() {
+        loadPanel();
+    });
+}
+
+function deleteFastDevice(projectId, deviceId) {
+    if (!confirm('Удалить устройство?')) {
+        return;
+    }
+
+    fetch('http://localhost:8000/api/v1/smart_house/' + projectId + '/devices/' + deviceId, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': 'Bearer ' + user.token
+        }
+    }).then(function() {
+        loadPanel();
     });
 }
 

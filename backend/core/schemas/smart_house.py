@@ -9,6 +9,10 @@ class DeviceAdd(BaseModel):
     title: str
     family: str = "leak"
 
+class DeviceUpdate(BaseModel):
+    title: str | None = None
+    family: str | None = None
+
 class DeviceCommand(BaseModel):
     signal: str
     value: Any

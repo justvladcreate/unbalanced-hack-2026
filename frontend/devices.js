@@ -10,6 +10,10 @@ var devices = [];
 var selectedTypes = {};
 var selectedStatuses = { OK: true, ERROR: true };
 
+if (user.isAdmin != true && user.hasPermission != true) {
+    location.href = 'domik.html';
+}
+
 logoutButton.onclick = function() {
     localStorage.removeItem('myUser');
     location.href = 'register.html';
@@ -171,7 +175,6 @@ function loadDevices() {
             document.getElementById('open-filters').onclick = openFilters;
             firstLoad = false;
             drawDevices();
-            openFilters();
         } else {
             drawDevices();
         }

@@ -316,6 +316,24 @@ function showScenarioPanel() {
         return;
     }
 
+    scenarioUser = JSON.parse(localStorage.getItem('myUser') || '{}');
+
+    if (scenarioUser.isAdmin != true && scenarioUser.hasPermission != true) {
+        scenarioPanel = document.createElement('div');
+        scenarioPanel.style.cssText = 'position: fixed; top: 120px; left: 120px; width: 320px; background: white; border-radius: 25px; padding: 20px; z-index: 20; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);';
+        scenarioPanel.innerHTML = '<div style="font-size: 24px; text-align: center;">Сценарии</div>' +
+            '<div style="margin-top: 15px; text-align: center;">Сценарии доступны после одобрения заявки УК</div>' +
+            '<button id="scenario-close" style="width: 100%; height: 40px; margin-top: 15px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Закрыть</button>';
+        document.body.appendChild(scenarioPanel);
+
+        document.getElementById('scenario-close').onclick = function() {
+            scenarioPanel.remove();
+            scenarioPanel = null;
+        };
+
+        return;
+    }
+
     scenarioPanel = document.createElement('div');
     scenarioPanel.style.cssText = 'position: fixed; top: 120px; left: 120px; width: 380px; max-height: 520px; overflow-y: auto; background: white; border-radius: 25px; padding: 20px; z-index: 20; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);';
     scenarioDevices = [];

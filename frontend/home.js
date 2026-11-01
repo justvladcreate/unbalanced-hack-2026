@@ -31,6 +31,11 @@ function renderHomeDevices(devices) {
 }
 
 function loadHomeDevices() {
+    if (user.isAdmin != true && user.hasPermission != true) {
+        homeDevicesBox.innerHTML = '<div style="font-size: 24px; text-align: center; margin-top: 10px;">Мои датчики</div><div style="text-align: center; margin-top: 20px; font-size: 18px;">Устройства появятся после одобрения заявки</div>';
+        return;
+    }
+
     fetch('/api/devices?token=' + encodeURIComponent(user.token)).then(function(response) {
         return response.json();
     }).then(function(devices) {
@@ -93,10 +98,11 @@ function loadMe() {
     fetch('/api/me?login=' + encodeURIComponent(user.login)).then(function(response) {
         return response.json();
     }).then(function(data) {
-        user.isAdmin = data.isAdmin;
-        user.hasPermission = data.hasPermission;
+        user.isAdmin = user.isAdmin == true || data.isAdmin == true;
+        user.hasPermission = data.hasPermission == true;
         localStorage.setItem('myUser', JSON.stringify(user));
         showButton();
+        loadHomeDevices();
     });
 }
 

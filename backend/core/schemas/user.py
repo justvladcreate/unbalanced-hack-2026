@@ -4,7 +4,7 @@ from fastapi_users import schemas
 from pydantic import Field, model_validator
 
 class UserRead(schemas.BaseUser[int]):
-    phone : Annotated[str, None]
+    phone: str | None = None
 
 class UserCreate(schemas.BaseUserCreate):
     password_confirm: str = Field(exclude=True)
@@ -17,4 +17,4 @@ class UserCreate(schemas.BaseUserCreate):
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    phone : Annotated[str, None]
+    phone: str | None = None

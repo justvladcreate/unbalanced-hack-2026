@@ -13,6 +13,8 @@
             padding: 30px 20px;
         }
         .cont1 {
+            width: 75px;
+            min-width: 75px;
             max-width: 75px;
             height: fit-content;
             overflow-x: hidden;
@@ -131,7 +133,7 @@
             padding: 4px 4px 4px 20px;
             transition: border-color 0.2s;
         }
-        .type_dt input {
+        .type_dt input, .type_dt select {
             outline: none;
             background: transparent;
             padding: 20px;
@@ -139,6 +141,8 @@
             border-radius: 50px;
             margin: 10px;
             margin-left: 455px;
+            border: none;
+            width: 100%;
         }
         .nttfj {
             display: flex;
@@ -149,7 +153,7 @@
             padding: 4px 4px 4px 20px;
             transition: border-color 0.2s;
         }
-        .nttfj input {
+        .nttfj input, .nttfj select {
             outline: none;
             background: transparent;
             padding: 20px;
@@ -157,6 +161,8 @@
             border-radius: 50px;
             margin: 10px;
             margin-left: 525px;
+            border: none;
+            width: 100%;
         }
         .dt_cr {
             width: 120px;
@@ -169,6 +175,49 @@
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        .nttf {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            width: 100%;
+            max-width: 700px;
+            margin: 80px auto 0 auto;
+        }
+        .name_dt, .type_dt, .nttfj {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #9a9a9a;
+            background: white;
+            padding: 8px 20px;
+            border-radius: 999px;
+        }
+        .name_dt input, .type_dt input, .nttfj input,
+        .type_dt select, .nttfj select {
+            width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 18px 10px;
+            font-size: 22px;
+            border: none;
+            border-radius: 999px;
+            background: transparent;
+            outline: none;
+        }
+        .name_dt input {
+            font-size: 28px;
+        }
+        .dt_cr {
+            width: 220px;
+            height: 55px;
+            margin-left: 0;
+            font-size: 18px;
+        }
+        .q12314 {
+            display: flex;
+            justify-content: center;
+            width: 100%;
         }
 
 
@@ -207,11 +256,15 @@
         </div>
         <div class="type_dt">
             <label for="type"></label>
-            <input type="text" id="type" name="type" placeholder="Тип датчика">
+            <select id="type" name="type">
+                <option value="">Тип датчика</option>
+            </select>
         </div>
         <div class="nttfj">
             <label for="ed"></label>
-            <input type="text" id="ed" name="ed" placeholder="Ед. измерения">
+            <select id="ed" name="ed">
+                <option value="">Ед. измерения</option>
+            </select>
         </div>
         <div class="q12314">
             <button class="dt_cr">Добавить датчик
@@ -219,5 +272,8 @@
         </div>
         
     </div>
+    <script src="add_device.js"></script>
+    <script src="scenarios.js"></script>
+    <script src="menu.js"></script>
 </body>
 </html>

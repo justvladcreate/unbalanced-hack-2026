@@ -239,6 +239,20 @@ class UjinClient:
             "token": ust_token, "serialnumber": serialnumber,
         })
 
+    def authenticate(self, login: str, password: str) -> dict:
+        data = urllib.parse.urlencode({
+            "login": login,
+            "password": password,
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            self.base_url + "/api/auth/authenticate",
+            data=data,
+            method="POST",
+        )
+        req.add_header("Content-Type", "application/x-www-form-urlencoded")
+        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
     @staticmethod
     def pending_tasks(info: dict) -> dict:
         """Из ответа get-device-info: {signal_name: task_value} для pending-команд."""

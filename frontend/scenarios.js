@@ -163,6 +163,22 @@ function resetScenarioForm() {
     document.getElementById('scenario-save').innerText = 'Добавить сценарий';
 }
 
+function runScenarios() {
+    scenarioRequest('http://localhost:8000/api/v1/smart_house/' + scenarioProjectId + '/tick?steps=1', {
+        method: 'POST'
+    }).then(function(response) {
+        return response.json();
+    }).then(function(project) {
+        if (!project.devices) {
+            alert('Не получилось проверить сценарии');
+            return;
+        }
+
+        alert('Сценарии проверены');
+        loadScenarioList();
+    });
+}
+
 function saveScenario() {
     var title = document.getElementById('scenario-title').value;
     var deviceIndex = document.getElementById('scenario-device').value;
@@ -252,6 +268,7 @@ function showScenarioPanel() {
         '<div style="margin-top: 10px;">Уведомление</div>' +
         '<input id="scenario-text" style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 20px; border: 1px solid gray;">' +
         '<button id="scenario-save" style="width: 100%; height: 40px; margin-top: 15px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Добавить сценарий</button>' +
+        '<button id="scenario-run" style="width: 100%; height: 40px; margin-top: 10px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Проверить сценарии</button>' +
         '<div id="scenario-list" style="margin-top: 15px;"></div>' +
         '<button id="scenario-logout" style="width: 100%; height: 40px; margin-top: 15px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Выйти</button>';
 
@@ -295,6 +312,7 @@ function showScenarioPanel() {
     document.getElementById('scenario-device').onchange = fillScenarioSignals;
     document.getElementById('scenario-action-device').onchange = fillActionSignals;
     document.getElementById('scenario-save').onclick = saveScenario;
+    document.getElementById('scenario-run').onclick = runScenarios;
 
     document.getElementById('scenario-logout').onclick = function() {
         localStorage.removeItem('myUser');

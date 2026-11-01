@@ -77,14 +77,38 @@ def evaluate_scenarios(project: SmartHouse):
 
     for sc in project.scenarios:
         trig_dev = devices_map.get(sc["trigger_device_id"])
+
         if not trig_dev:
+            project.notifications.insert(0, {
+                "name_project": project.name_project,
+                "phone": project.owner_phone,
+                "scenario": sc["title"],
+                "message": "Датчик сценария недоступен: " + sc["title"],
+            })
             continue
 
         current_val = trig_dev["state"].get(sc["trigger_signal"])
+
         if str(current_val) == str(sc["trigger_value"]):
             act_dev = devices_map.get(sc.get("action_device_id"))
+
             if act_dev and sc.get("action_signal"):
-                act_dev["state"][sc["action_signal"]] = sc["action_value"]
+                try:
+                    act_dev["state"][sc["action_signal"]] = sc["action_value"]
+                except Exception:
+                    project.notifications.insert(0, {
+                        "name_project": project.name_project,
+                        "phone": project.owner_phone,
+                        "scenario": sc["title"],
+                        "message": "Ошибка действия сценария: " + sc["title"],
+                    })
+            elif sc.get("action_device_id"):
+                project.notifications.insert(0, {
+                    "name_project": project.name_project,
+                    "phone": project.owner_phone,
+                    "scenario": sc["title"],
+                    "message": "Устройство действия недоступно: " + sc["title"],
+                })
 
             project.notifications.insert(0, {
                 "name_project": project.name_project,
@@ -92,6 +116,8 @@ def evaluate_scenarios(project: SmartHouse):
                 "scenario": sc["title"],
                 "message": f"SMS на тел. {project.owner_phone}: {sc['notifications_text']}",
             })
+
+    project.notifications = project.notifications[:20]
 
 
 

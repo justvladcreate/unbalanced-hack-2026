@@ -9,7 +9,7 @@ function setupChart() {
         return;
     }
 
-    box.innerHTML = '<div id="chart-title" style="font-size: 24px; text-align: center; padding-top: 15px;">Выберите датчик</div><canvas id="chart" width="960" height="420" style="display: block; margin: 10px auto;"></canvas>';
+    box.innerHTML = '<div id="chart-title" style="font-size: 24px; text-align: center; padding-top: 15px;">Выберите датчик</div><canvas id="chart" width="960" height="300" style="display: block; margin: 10px auto;"></canvas>';
     chartCanvas = document.getElementById('chart');
 }
 
@@ -52,7 +52,7 @@ function drawChart() {
         title.innerText = chartDevice.name;
         ctx.fillStyle = 'gray';
         ctx.font = '20px serif';
-        ctx.fillText('Нет данных для графика', 340, 210);
+        ctx.fillText('Нет данных для графика', 340, chartCanvas.height / 2);
         return;
     }
 
@@ -93,11 +93,16 @@ function drawChart() {
     ctx.fillStyle = 'gray';
     ctx.font = '14px serif';
 
+    var left = 50;
+    var right = chartCanvas.width - 50;
+    var top = 30;
+    var bottom = chartCanvas.height - 30;
+
     for (var line = 0; line < 5; line++) {
-        var y = 40 + line * 80;
+        var y = top + line * (bottom - top) / 4;
         ctx.beginPath();
-        ctx.moveTo(50, y);
-        ctx.lineTo(910, y);
+        ctx.moveTo(left, y);
+        ctx.lineTo(right, y);
         ctx.stroke();
 
         var value = max - (max - min) * line / 4;
@@ -109,14 +114,14 @@ function drawChart() {
     ctx.lineWidth = 3;
 
     for (var j = 0; j < history.length; j++) {
-        var x = 50;
-        var pointY = 360;
+        var x = left;
+        var pointY = bottom;
 
         if (history.length > 1) {
-            x = 50 + 860 * j / (history.length - 1);
+            x = left + (right - left) * j / (history.length - 1);
         }
 
-        pointY = 360 - 320 * (history[j].v - min) / (max - min);
+        pointY = bottom - (bottom - top) * (history[j].v - min) / (max - min);
 
         if (j == 0) {
             ctx.moveTo(x, pointY);
@@ -131,6 +136,10 @@ function drawChart() {
 function showChart(device) {
     chartDevice = device;
     drawChart();
+
+    if (typeof showControls == 'function') {
+        showControls(device);
+    }
 }
 
 function refreshChart() {
@@ -154,6 +163,10 @@ function refreshChart() {
 
         if (chartCanvas) {
             drawChart();
+        }
+
+        if (typeof showControls == 'function') {
+            showControls(chartDevice);
         }
     });
 }

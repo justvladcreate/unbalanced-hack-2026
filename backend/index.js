@@ -147,6 +147,7 @@ app.get('/api/devices', function(req, res) {
 
                 result.push({
                     id: key,
+                    project_id: projects[p].id,
                     name: fastDevice.title,
                     type: fastDevice.family,
                     ext_id: fastDevice.id,
@@ -206,6 +207,7 @@ app.post('/api/devices', function(req, res) {
         var fastDevice = project.devices[project.devices.length - 1];
         var newDev = {
             id: Date.now(),
+            project_id: project.id,
             name: req.body.name,
             type: req.body.type,
             unit: req.body.unit || '',

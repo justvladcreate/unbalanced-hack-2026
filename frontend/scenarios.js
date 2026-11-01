@@ -313,8 +313,6 @@ function saveScenario() {
 
 function showScenarioPanel() {
     if (scenarioPanel) {
-        scenarioPanel.remove();
-        scenarioPanel = null;
         return;
     }
 
@@ -324,7 +322,10 @@ function showScenarioPanel() {
     scenarioItems = [];
     scenarioProjectId = 0;
     scenarioEditingId = 0;
-    scenarioPanel.innerHTML = '<div style="font-size: 24px; text-align: center;">Сценарии</div>' +
+    scenarioPanel.innerHTML = '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+        '<div style="font-size: 24px;">Сценарии</div>' +
+        '<button id="scenario-close" style="border: none; border-radius: 20px; padding: 6px 10px; background: gray; color: white; cursor: pointer;">Закрыть</button>' +
+        '</div>' +
         '<div style="margin-top: 10px;">Название</div>' +
         '<input id="scenario-title" style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 20px; border: 1px solid gray;">' +
         '<div style="margin-top: 10px;">Датчик</div>' +
@@ -344,8 +345,7 @@ function showScenarioPanel() {
         '<button id="scenario-save" style="width: 100%; height: 40px; margin-top: 15px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Добавить сценарий</button>' +
         '<button id="scenario-run" style="width: 100%; height: 40px; margin-top: 10px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Проверить сценарии</button>' +
         '<button id="scenario-demo" style="width: 100%; height: 40px; margin-top: 10px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Демо: протечка</button>' +
-        '<div id="scenario-list" style="margin-top: 15px;"></div>' +
-        '<button id="scenario-logout" style="width: 100%; height: 40px; margin-top: 15px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Выйти</button>';
+        '<div id="scenario-list" style="margin-top: 15px;"></div>';
 
     document.body.appendChild(scenarioPanel);
 
@@ -390,10 +390,8 @@ function showScenarioPanel() {
     document.getElementById('scenario-run').onclick = runScenarios;
     document.getElementById('scenario-demo').onclick = runDemo;
 
-    document.getElementById('scenario-logout').onclick = function() {
-        localStorage.removeItem('myUser');
-        location.href = 'register.html';
+    document.getElementById('scenario-close').onclick = function() {
+        scenarioPanel.remove();
+        scenarioPanel = null;
     };
 }
-
-document.querySelector('.knopka4').onclick = showScenarioPanel;

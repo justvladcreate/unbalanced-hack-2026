@@ -73,7 +73,7 @@ def evaluate_scenarios(project: SmartHouse):
                 act_dev["state"][sc["action_signal"]] = sc["action_value"]
 
             project.notifications.insert(0, {
-                "name_project": project.name,
+                "name_project": project.name_project,
                 "phone": project.owner_phone,
                 "scenario": sc["title"],
                 "message": f"SMS на тел. {project.owner_phone}: {sc['notifications_text']}",
@@ -187,13 +187,22 @@ async def update_device_signal(
     if cmd.signal not in emulator.signals:
         raise HTTPException(status_code=400, detail="Сигнал не найден у устройства")
 
-    if hasattr(emulator, "set_wet") and cmd.signal == "leak":
-        emulator.set_wet(bool(int(cmd.value)))
+    sig_obj = emulator.signals[cmd.signal]
+    if sig_obj.writable:
+        emulator.handle_recv({"recv": [{"command": "management", "id": device_id, cmd.signal: cmd.value}]
+      })
+        emulator.step(1)
+    else:
     
-    emulator.handle_recv({
-        "recv": [{"command": "management", "id": device_id, cmd.signal: cmd.value}]
-    })
-    emulator.step(1)  
+        if hasattr(emulator, "set_wet") and cmd.signal == "leak":
+            emulator.set_wet(bool(int(cmd.value)))
+            emulator.step(1)
+        elif hasattr(emulator, "set_smoke") and cmd.signal == "smoke":
+            emulator.set_smoke(int(cmd.value))
+            emulator.step(1)
+        else:
+            emulator.set_value(cmd.signal, cmd.value)
+            emulator.flush()
 
     target_dev["state"] = {s.name: s.value for s in emulator.signals.values()}
 

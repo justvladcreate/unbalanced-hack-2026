@@ -1,4 +1,4 @@
-from typing import Any, Annotated
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -19,10 +19,10 @@ class ScenarioAdd(BaseModel):
     trigger_signal: str
     trigger_value: Any
 
-    action_device_id: Annotated[str, None]
-    action_signal: Annotated[str, None]
-    action_value: Annotated[Any, None]
-    notifications_text: str
+    action_device_id: Optional[str]
+    action_signal: Optional[str]
+    action_value: Optional[str]
+    notifications_text: str = "Dangers"
 
 class SmartHouseRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)

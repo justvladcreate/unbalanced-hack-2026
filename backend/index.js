@@ -1,6 +1,8 @@
 var express = require('express');
 var cors = require('cors');
 var path = require('path');
+var fs = require('fs');
+var spawn = require('child_process').spawn;
 
 var app = express();
 var port = 3000;
@@ -335,6 +337,30 @@ setInterval(function() {
 
 app.get('/tests', function(req, res) {
   res.sendFile(path.join(frontend, 'tests.html'));
+});
+
+var python = path.join(__dirname, '..', '.venv', 'Scripts', 'python.exe');
+
+if (!fs.existsSync(python)) {
+    python = path.join(__dirname, '..', '.venv', 'bin', 'python');
+}
+
+if (!fs.existsSync(python)) {
+    python = 'python';
+}
+
+var fastapi = spawn(python, ['-m', 'uvicorn', 'main:main_app', '--host', '127.0.0.1', '--port', '8000'], { cwd: __dirname });
+
+fastapi.stdout.on('data', function(data) {
+    console.log(data.toString());
+});
+
+fastapi.stderr.on('data', function(data) {
+    console.log(data.toString());
+});
+
+process.on('exit', function() {
+    fastapi.kill();
 });
 
 app.listen(port, function() {

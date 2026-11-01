@@ -440,6 +440,7 @@ vite.config.ts.timestamp-*
 STAMP.txt
 доступы.json
 unbalanced.pdf
+unbalanced.txt
 
 *.bpmn
 *.svg

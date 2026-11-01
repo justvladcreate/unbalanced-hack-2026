@@ -60,10 +60,18 @@ app.get('/api/me', function(req, res) {
     var login = req.query.login;
     for (var i = 0; i < users.length; i++) {
         if (users[i].login == login) {
-            return res.json({ isAdmin: users[i].isAdmin, hasPermission: users[i].hasPermission });
+            return res.json({ login: users[i].login, isAdmin: users[i].isAdmin, hasPermission: users[i].hasPermission });
         }
     }
-    res.json({ isAdmin: false, hasPermission: false });
+    res.json({ login: login, isAdmin: false, hasPermission: false });
+});
+
+app.get('/api/users', function(req, res) {
+    var result = [];
+    for (var i = 0; i < users.length; i++) {
+        result.push({ login: users[i].login, isAdmin: users[i].isAdmin, hasPermission: users[i].hasPermission });
+    }
+    res.json(result);
 });
 
 app.get('/api/devices', function(req, res) {

@@ -339,8 +339,14 @@ async def create_scenario(
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
 ):
     project = await get_user_project(project_id, user, session)
+    next_id = 1
+
+    for scenario in project.scenarios:
+        if scenario["id"] >= next_id:
+            next_id = scenario["id"] + 1
+
     scenario_dict = {
-        "id": len(project.scenarios) + 1,
+        "id": next_id,
         **data.model_dump(),
     }
     project.scenarios.append(scenario_dict)
@@ -349,6 +355,63 @@ async def create_scenario(
     flag_modified(project, "scenarios")
     flag_modified(project, "devices")
     flag_modified(project, "notifications")
+    await session.commit()
+    await session.refresh(project)
+    return project
+
+
+@router.put("/{project_id}/scenarios/{scenario_id}", response_model=SmartHouseRead)
+async def update_scenario(
+    project_id: int,
+    scenario_id: int,
+    data: ScenarioAdd,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+):
+    project = await get_user_project(project_id, user, session)
+    found = False
+
+    for i in range(len(project.scenarios)):
+        if project.scenarios[i]["id"] == scenario_id:
+            project.scenarios[i] = {
+                "id": scenario_id,
+                **data.model_dump(),
+            }
+            found = True
+
+    if not found:
+        raise HTTPException(status_code=404, detail="Сценарий не найден")
+
+    evaluate_scenarios(project)
+
+    flag_modified(project, "scenarios")
+    flag_modified(project, "devices")
+    flag_modified(project, "notifications")
+    await session.commit()
+    await session.refresh(project)
+    return project
+
+
+@router.delete("/{project_id}/scenarios/{scenario_id}", response_model=SmartHouseRead)
+async def delete_scenario(
+    project_id: int,
+    scenario_id: int,
+    user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+):
+    project = await get_user_project(project_id, user, session)
+    found = False
+
+    for scenario in project.scenarios:
+        if scenario["id"] == scenario_id:
+            found = True
+
+    if not found:
+        raise HTTPException(status_code=404, detail="Сценарий не найден")
+
+    project.scenarios = [s for s in project.scenarios if s["id"] != scenario_id]
+
+    flag_modified(project, "scenarios")
     await session.commit()
     await session.refresh(project)
     return project

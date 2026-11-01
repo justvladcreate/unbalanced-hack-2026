@@ -179,6 +179,80 @@ function runScenarios() {
     });
 }
 
+function createDemoDevice(title, family) {
+    return scenarioRequest('http://localhost:8000/api/v1/smart_house/' + scenarioProjectId + '/devices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: title, family: family })
+    }).then(function(response) {
+        return response.json();
+    });
+}
+
+function runDemo() {
+    var leak = null;
+    var valve = null;
+
+    for (var i = 0; i < scenarioDevices.length; i++) {
+        if (scenarioDevices[i].type == 'leak') {
+            leak = scenarioDevices[i];
+        }
+        if (scenarioDevices[i].type == 'light') {
+            valve = scenarioDevices[i];
+        }
+    }
+
+    var chain = Promise.resolve();
+
+    if (!leak) {
+        chain = chain.then(function() {
+            return createDemoDevice('Датчик протечки', 'leak');
+        }).then(function(project) {
+            leak = project.devices[project.devices.length - 1];
+            leak.ext_id = leak.id;
+        });
+    }
+
+    if (!valve) {
+        chain = chain.then(function() {
+            return createDemoDevice('Клапан воды', 'light');
+        }).then(function(project) {
+            valve = project.devices[project.devices.length - 1];
+            valve.ext_id = valve.id;
+        });
+    }
+
+    chain.then(function() {
+        return scenarioRequest('http://localhost:8000/api/v1/smart_house/' + scenarioProjectId + '/scenarios', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: 'Протечка -> клапан',
+                trigger_device_id: leak.ext_id,
+                trigger_signal: 'leak',
+                trigger_value: 1,
+                action_device_id: valve.ext_id,
+                action_signal: 'lamp',
+                action_value: 0,
+                notifications_text: 'Протечка! Клапан перекрыл воду'
+            })
+        });
+    }).then(function() {
+        return scenarioRequest('http://localhost:8000/api/v1/smart_house/' + scenarioProjectId + '/devices/' + leak.ext_id + '/command', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ signal: 'leak', value: 1 })
+        });
+    }).then(function() {
+        return scenarioRequest('http://localhost:8000/api/v1/smart_house/' + scenarioProjectId + '/tick?steps=1', {
+            method: 'POST'
+        });
+    }).then(function() {
+        alert('Демо выполнено: протечка -> клапан -> уведомление');
+        loadScenarioList();
+    });
+}
+
 function saveScenario() {
     var title = document.getElementById('scenario-title').value;
     var deviceIndex = document.getElementById('scenario-device').value;
@@ -269,6 +343,7 @@ function showScenarioPanel() {
         '<input id="scenario-text" style="width: 100%; box-sizing: border-box; padding: 8px; border-radius: 20px; border: 1px solid gray;">' +
         '<button id="scenario-save" style="width: 100%; height: 40px; margin-top: 15px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Добавить сценарий</button>' +
         '<button id="scenario-run" style="width: 100%; height: 40px; margin-top: 10px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Проверить сценарии</button>' +
+        '<button id="scenario-demo" style="width: 100%; height: 40px; margin-top: 10px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Демо: протечка</button>' +
         '<div id="scenario-list" style="margin-top: 15px;"></div>' +
         '<button id="scenario-logout" style="width: 100%; height: 40px; margin-top: 15px; border: none; border-radius: 50px; background: gray; color: white; cursor: pointer;">Выйти</button>';
 
@@ -313,6 +388,7 @@ function showScenarioPanel() {
     document.getElementById('scenario-action-device').onchange = fillActionSignals;
     document.getElementById('scenario-save').onclick = saveScenario;
     document.getElementById('scenario-run').onclick = runScenarios;
+    document.getElementById('scenario-demo').onclick = runDemo;
 
     document.getElementById('scenario-logout').onclick = function() {
         localStorage.removeItem('myUser');

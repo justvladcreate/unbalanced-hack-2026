@@ -56,8 +56,17 @@ function drawDevices() {
             continue;
         }
 
-        var cssClass = getDeviceClass(devices[i].type);
-        box.innerHTML += '<div class="' + cssClass + '">' + devices[i].name + ' — ' + devices[i].status + '</div>';
+        var row = document.createElement('div');
+        row.className = getDeviceClass(devices[i].type);
+        row.innerText = devices[i].name + ' — ' + devices[i].status;
+        row.onclick = function(device) {
+            return function() {
+                if (typeof showChart == 'function') {
+                    showChart(device);
+                }
+            };
+        }(devices[i]);
+        box.appendChild(row);
         count = count + 1;
     }
 

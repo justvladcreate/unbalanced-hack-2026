@@ -126,6 +126,7 @@ app.post('/api/devices', function(req, res) {
             family: fastDevice.family,
             state: fastDevice.state,
             declaration: fastDevice.declaration,
+            history: {},
             status: 'NEW'
         };
 
@@ -208,6 +209,38 @@ app.post('/api/requests/reject', function(req, res) {
 setInterval(function() {
     var randomIndex = Math.floor(Math.random() * devices.length);
     devices[randomIndex].status = Math.random() > 0.5 ? 'OK' : 'ERROR';
+
+    for (var i = 0; i < devices.length; i++) {
+        if (!devices[i].state || !devices[i].declaration) {
+            continue;
+        }
+
+        if (!devices[i].history) {
+            devices[i].history = {};
+        }
+
+        for (var j = 0; j < devices[i].declaration.length; j++) {
+            var signal = devices[i].declaration[j];
+
+            if (signal.control != 'graph' || typeof devices[i].state[signal.name] != 'number') {
+                continue;
+            }
+
+            var nextValue = devices[i].state[signal.name] + (Math.random() - 0.5) * 2;
+            devices[i].state[signal.name] = Math.round(nextValue * 10) / 10;
+
+            if (!devices[i].history[signal.name]) {
+                devices[i].history[signal.name] = [];
+            }
+
+            devices[i].history[signal.name].push({ t: Date.now(), v: devices[i].state[signal.name] });
+
+            if (devices[i].history[signal.name].length > 30) {
+                devices[i].history[signal.name].shift();
+            }
+        }
+    }
+
     console.log("[UJIN SYNC] Сходили в Ujin, обновили устройства в БД");
 }, 5000);
 

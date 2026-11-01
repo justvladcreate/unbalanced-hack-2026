@@ -195,15 +195,19 @@ function loadNotifications() {
                 }).then(function(response) {
                     return response.json();
                 }).then(function(projects) {
+                    var fastHtml = '';
+
                     for (var p = 0; p < projects.length; p++) {
                         if (!projects[p].notifications) {
                             continue;
                         }
 
                         for (var n = 0; n < projects[p].notifications.length; n++) {
-                            box.innerHTML += '<div class="barrier1">' + projects[p].notifications[n].message + '</div>';
+                            fastHtml += '<div class="barrier1">' + projects[p].notifications[n].message + '</div>';
                         }
                     }
+
+                    box.insertAdjacentHTML('afterbegin', fastHtml);
                 });
             }
         });

@@ -283,3 +283,6 @@ src/testTestingRootWkspc/coverageWorkspace/.coverage
 STAMP.txt
 доступы.json
 unbalanced.pdf
+
+*.bpmn
+*.svg

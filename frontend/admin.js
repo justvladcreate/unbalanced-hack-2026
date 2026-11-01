@@ -11,6 +11,16 @@ if (user.isAdmin != true) {
     location.href = 'domik.html';
 }
 
+var adminStyle = document.createElement('style');
+adminStyle.innerHTML = '.cont1 { width: 85px; min-width: 85px; max-width: 85px; overflow-x: hidden; }' +
+    '.cont4helper > div { width: 380px; min-height: 58px; height: auto; padding: 6px 10px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 6px; line-height: 1.2; font-size: 18px; text-align: left; }' +
+    '.cont4helper > div button { border: none; border-radius: 12px; padding: 4px 6px; background: whitesmoke; color: black; cursor: pointer; font-size: 12px; }' +
+    '.cont3helper > div { width: 260px; height: auto; min-height: 50px; padding: 8px; box-sizing: border-box; line-height: 1.2; font-size: 15px; overflow-wrap: anywhere; }' +
+    '.cont3helper button { border: none; border-radius: 10px; padding: 3px 6px; margin: 2px; cursor: pointer; font-size: 12px; }' +
+    '.polzovateli { height: auto; max-height: 110px; overflow-y: auto; padding: 10px; font-size: 15px; line-height: 1.5; text-align: left; }' +
+    '.polzovateli div { padding-left: 6px; }';
+document.head.appendChild(adminStyle);
+
 var logoutButton = document.querySelector('.knopka4');
 
 logoutButton.onclick = function() {
@@ -59,12 +69,15 @@ function loadDevices() {
             var buttons = '';
 
             if (devices[i].project_id && devices[i].ext_id) {
-                buttons = ' <button onclick="showDeviceInfo(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Возможности</button>';
-                buttons += ' <button onclick="editFastDevice(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Изменить</button>';
-                buttons += ' <button onclick="deleteFastDevice(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Удалить</button>';
+                buttons += '<button onclick="showDeviceInfo(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Возможности</button>';
+                buttons += '<button onclick="editFastDevice(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Изменить</button>';
+                buttons += '<button onclick="deleteFastDevice(\'' + devices[i].project_id + '\', \'' + devices[i].ext_id + '\')">Удалить</button>';
             }
 
-            box.innerHTML += '<div class="' + cssClass + '">' + devices[i].name + ' — ' + devices[i].status + buttons + '</div>';
+            box.innerHTML += '<div class="' + cssClass + '">' +
+                '<span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + devices[i].name + ' — ' + devices[i].status + '</span>' +
+                '<span style="display: flex; gap: 4px; flex-shrink: 0;">' + buttons + '</span>' +
+                '</div>';
         }
     });
 }

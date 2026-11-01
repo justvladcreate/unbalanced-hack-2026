@@ -11,6 +11,33 @@ var logoutButton = document.querySelector('.knopka4');
 
 title.innerText = 'Добро пожаловать, ' + user.login + '!';
 
+var mainBox = document.querySelector('.cont2');
+var homeDevicesBox = document.createElement('div');
+homeDevicesBox.style.cssText = 'margin-top: 20px; max-height: 420px; overflow-y: auto;';
+mainBox.appendChild(homeDevicesBox);
+
+function renderHomeDevices(devices) {
+    var html = '<div style="font-size: 24px; text-align: center; margin-top: 10px;">Мои датчики</div>';
+
+    if (devices.length == 0) {
+        html += '<div style="text-align: center; margin-top: 20px; font-size: 18px;">Датчиков пока нет</div>';
+    }
+
+    for (var i = 0; i < devices.length; i++) {
+        html += '<div style="background: gray; color: white; border-radius: 50px; padding: 12px 20px; margin: 8px 30px; text-align: center; font-size: 18px;">' + devices[i].name + ' — ' + devices[i].status + '</div>';
+    }
+
+    homeDevicesBox.innerHTML = html;
+}
+
+function loadHomeDevices() {
+    fetch('/api/devices?token=' + encodeURIComponent(user.token)).then(function(response) {
+        return response.json();
+    }).then(function(devices) {
+        renderHomeDevices(devices);
+    });
+}
+
 logoutButton.onclick = function() {
     localStorage.removeItem('myUser');
     location.href = 'register.html';
@@ -75,4 +102,6 @@ function loadMe() {
 
 showButton();
 loadMe();
+loadHomeDevices();
 setInterval(loadMe, 2000);
+setInterval(loadHomeDevices, 2000);

@@ -151,6 +151,30 @@ async def create_project(
     return project
 
 
+@router.get("/device-types")
+def get_device_types():
+    result = []
+
+    for family, device_class in REGISTRY.items():
+        emulator = device_class(serial="0")
+        measures = []
+
+        for signal in emulator.signals.values():
+            if signal.measure and signal.measure not in measures:
+                measures.append(signal.measure)
+
+        if not measures:
+            measures.append("шт")
+
+        result.append({
+            "family": family,
+            "title": emulator.title,
+            "measures": measures,
+        })
+
+    return result
+
+
 @router.get("/{project_id}", response_model=SmartHouseRead)
 async def get_project_by_id(
     project_id: int,

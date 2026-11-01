@@ -79,10 +79,62 @@ app.get('/api/devices', function(req, res) {
 });
 
 app.post('/api/devices', function(req, res) {
-    var newDev = { id: Date.now(), name: req.body.name, type: req.body.type, status: 'NEW' };
-    devices.push(newDev);
-    console.log("Добавили устройство!");
-    res.json(newDev);
+    var token = req.body.token;
+
+    if (!token) {
+        return res.status(401).json({ error: 'Нужен токен FastAPI' });
+    }
+
+    var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+
+    fetch('http://localhost:8000/api/v1/smart_house', { headers: headers }).then(function(response) {
+        return response.json();
+    }).then(function(projects) {
+        if (projects.length > 0) {
+            return projects[0].id;
+        }
+
+        return fetch('http://localhost:8000/api/v1/smart_house', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ name: 'Мой дом' })
+        }).then(function(response) {
+            return response.json();
+        }).then(function(project) {
+            return project.id;
+        });
+    }).then(function(projectId) {
+        return fetch('http://localhost:8000/api/v1/smart_house/' + projectId + '/devices', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ title: req.body.name, family: req.body.type })
+        }).then(function(response) {
+            return response.json();
+        });
+    }).then(function(project) {
+        if (!project.devices) {
+            return res.status(400).json({ error: 'FastAPI не добавил устройство' });
+        }
+
+        var fastDevice = project.devices[project.devices.length - 1];
+        var newDev = {
+            id: Date.now(),
+            name: req.body.name,
+            type: req.body.type,
+            unit: req.body.unit || '',
+            ext_id: fastDevice.id,
+            family: fastDevice.family,
+            state: fastDevice.state,
+            declaration: fastDevice.declaration,
+            status: 'NEW'
+        };
+
+        devices.push(newDev);
+        console.log("Добавили устройство!");
+        res.json(newDev);
+    }).catch(function() {
+        res.status(500).json({ error: 'Не удалось добавить устройство' });
+    });
 });
 
 app.get('/api/scenarios', function(req, res) {

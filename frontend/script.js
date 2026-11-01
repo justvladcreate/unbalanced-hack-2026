@@ -1,4 +1,4 @@
-var API = 'http://localhost:3000/api';
+var API = 'http://localhost:8000/api/v1';
 var myToken = '';
 var myLogin = '';
 var amIAdmin = false;
@@ -29,7 +29,7 @@ function hideReg() {
 function doRegister() {
     var l = document.getElementById('reg-login').value;
     var p = document.getElementById('reg-pass').value;
-    fetch(API + '/register', {
+    fetch(API + '/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login: l, password: p })
@@ -42,7 +42,7 @@ function doRegister() {
 function doLogin() {
     var l = document.getElementById('login').value;
     var p = document.getElementById('password').value;
-    fetch(API + '/login', {
+    fetch(API + '/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login: l, password: p })
